@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>REWIND</title>
+<!-- Fonts loaded via @import in style block -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;1,400&family=Barlow:wght@400;500;600&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#0a0015;
+  --bg2:#0f0020;
+  --bg3:#130028;
+  --surface:rgba(255,255,255,.06);
+  --surface2:rgba(255,255,255,.04);
+  --border:rgba(255,255,255,.12);
+  --border2:rgba(255,255,255,.18);
+  --accent:#c084fc;
+  --accentbg:rgba(192,132,252,.12);
+  --accent2:#818cf8;
+  --accent3:#f472b6;
+  --text:#f0e8ff;
+  --muted:rgba(200,170,255,.55);
+  --muted2:rgba(200,170,255,.28);
+  --yes:#34d399;--yesbg:rgba(52,211,153,.1);
+  --no:#f87171;--nobg:rgba(248,113,113,.1);
+  --mello:#a78bfa;--mellobg:rgba(167,139,250,.1);--melloborder:rgba(167,139,250,.25);
+  --wik:#67e8f9;--wikbg:rgba(103,232,249,.08);--wikborder:rgba(103,232,249,.2);
+  --gold:#fbbf24;--goldbg:rgba(251,191,36,.08);--goldborder:rgba(251,191,36,.25)
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Barlow',sans-serif;
+  min-height:100vh;
+  background-image:
+    radial-gradient(ellipse at 15% 0%,rgba(139,92,246,.18) 0%,transparent 55%),
+    radial-gradient(ellipse at 85% 10%,rgba(244,114,182,.12) 0%,transparent 50%),
+    radial-gradient(ellipse at 50% 100%,rgba(99,102,241,.14) 0%,transparent 60%),
+    radial-gradient(ellipse at 0% 60%,rgba(192,132,252,.08) 0%,transparent 40%);
+}
+
+#app{min-height:100vh;padding:32px 16px 56px;display:flex;flex-direction:column;align-items:center;width:100%;max-width:100vw;overflow-x:hidden}
+#root{width:100%;max-width:100%;display:flex;flex-direction:column;align-items:center;gap:8px;overflow-x:hidden}
+
+.logo{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:5rem;
+  letter-spacing:6px;
+  text-transform:uppercase;
+  text-align:center;
+  line-height:.9;
+  background:linear-gradient(135deg,#f0abfc 0%,#818cf8 40%,#67e8f9 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  position:relative;filter:drop-shadow(0 0 30px rgba(192,132,252,.3))
+}
+.logo::after{
+  content:'';display:block;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(192,132,252,.6),rgba(103,232,249,.6),transparent);
+  margin-top:8px;width:100%;
+}
+.mello-mode .logo{background:linear-gradient(135deg,#a78bfa,#c084fc,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.wik-mode .logo{background:linear-gradient(135deg,#67e8f9,#34d399,#a3e635);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+.sub{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:.72rem;letter-spacing:5px;color:var(--muted);
+  text-align:center;margin-bottom:28px;margin-top:8px;
+  font-weight:600;text-transform:uppercase
+}
+
+.playlist-bar{
+  display:flex;gap:8px;margin-bottom:28px;width:100%;max-width:480px;align-items:center
+}
+.playlist-select-wrap{
+  flex:1;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.12);border-radius:14px;
+  padding:2px 4px;backdrop-filter:blur(12px);overflow:hidden
+}
+.playlist-select{
+  width:100%;background:none;border:none;outline:none;
+  font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;
+  color:var(--text);padding:10px 14px;cursor:pointer;
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c084fc' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:36px
+}
+.playlist-select option{background:#130028;color:#f0e8ff;font-family:sans-serif}
+.upload-btn{
+  width:48px;height:48px;flex-shrink:0;
+  background:rgba(192,132,252,.1);border:1px solid rgba(192,132,252,.25);
+  border-radius:14px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .2s;color:var(--accent);
+  font-family:'Bebas Neue',sans-serif;font-size:1.4rem;
+  backdrop-filter:blur(12px)
+}
+.upload-btn:hover{background:rgba(192,132,252,.2);border-color:rgba(192,132,252,.45);box-shadow:0 0 16px rgba(192,132,252,.2)}
+.mode-btn{display:none}
+
+.card{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:20px;padding:32px;width:100%;max-width:480px;
+  backdrop-filter:blur(20px);
+  box-shadow:0 8px 32px rgba(139,92,246,.12),inset 0 1px 0 rgba(255,255,255,.08)
+}
+.label{
+  font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:3px;
+  color:var(--accent);text-transform:uppercase;margin-bottom:16px
+}
+.prow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pnum{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--accent);min-width:22px;letter-spacing:1px}
+.mello-mode .pnum{color:var(--mello)}
+.wik-mode .pnum{color:var(--wik)}
+input[type=text],input[type=number]{
+  flex:1;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;padding:11px 14px;color:var(--text);
+  font-family:'Barlow',sans-serif;font-size:.95rem;outline:none;
+  transition:all .2s;backdrop-filter:blur(8px)
+}
+input[type=text]:focus,input[type=number]:focus{border-color:rgba(192,132,252,.5);box-shadow:0 0 0 3px rgba(192,132,252,.1)}
+.mello-mode input:focus{border-color:rgba(167,139,250,.5);box-shadow:0 0 0 3px rgba(167,139,250,.1)}
+.wik-mode input:focus{border-color:rgba(103,232,249,.5);box-shadow:0 0 0 3px rgba(103,232,249,.1)}
+input::placeholder{color:var(--muted2)}
+.xbtn{background:none;border:none;color:var(--muted2);font-size:1.1rem;cursor:pointer;padding:4px 8px}
+.xbtn:hover{color:var(--no)}
+.addbtn{
+  background:none;border:1px dashed rgba(255,255,255,.15);border-radius:12px;
+  color:var(--muted);padding:10px;width:100%;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:2px;
+  text-transform:uppercase;margin-top:6px;transition:all .2s;font-weight:600
+}
+.addbtn:hover{border-color:rgba(192,132,252,.4);color:var(--accent)}
+.mello-mode .addbtn:hover{border-color:rgba(167,139,250,.4);color:var(--mello)}
+.wik-mode .addbtn:hover{border-color:rgba(103,232,249,.4);color:var(--wik)}
+.pbtn{
+  background:linear-gradient(135deg,rgba(139,92,246,.7),rgba(99,102,241,.7));
+  color:#fff;border:1px solid rgba(192,132,252,.3);border-radius:14px;
+  padding:14px;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;
+  letter-spacing:3px;cursor:pointer;width:100%;margin-top:20px;transition:all .2s;
+  backdrop-filter:blur(8px);box-shadow:0 4px 20px rgba(139,92,246,.25)
+}
+.pbtn:hover{background:linear-gradient(135deg,rgba(139,92,246,.9),rgba(99,102,241,.9));transform:translateY(-1px);box-shadow:0 6px 28px rgba(139,92,246,.4)}
+.mello-mode .pbtn{background:linear-gradient(135deg,rgba(167,139,250,.7),rgba(244,114,182,.7));border-color:rgba(167,139,250,.3)}
+.wik-mode .pbtn{background:linear-gradient(135deg,rgba(103,232,249,.5),rgba(52,211,153,.5));border-color:rgba(103,232,249,.3);color:#0a0015}
+.pbtn:disabled{opacity:.25;cursor:not-allowed;transform:none;box-shadow:none}
+.winsetting{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:16px;flex-wrap:wrap}
+.winsetting label{font-family:'Barlow Condensed',sans-serif;font-size:.8rem;color:var(--muted);font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.winsetting select{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:7px 10px;font-family:'Barlow',sans-serif;font-size:.85rem;color:var(--text);outline:none}
+.rules-box{
+  background:rgba(192,132,252,.05);
+  border:1px solid rgba(192,132,252,.15);border-left:2px solid rgba(192,132,252,.5);
+  border-radius:0 12px 12px 0;padding:14px 16px;margin-top:16px;
+  font-size:.8rem;color:var(--muted);line-height:1.8
+}
+.rules-box b{color:var(--text)}
+.mello-mode .rules-box{border-left-color:rgba(167,139,250,.5)}
+.wik-mode .rules-box{border-left-color:rgba(103,232,249,.5)}
+
+.scoreboard{width:100%;max-width:min(720px,calc(100vw - 32px));display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.score-row{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
+  border-radius:14px;padding:10px 16px;display:flex;align-items:center;gap:10px;
+  backdrop-filter:blur(12px)
+}
+.score-row.active{
+  border-color:rgba(192,132,252,.35);background:rgba(192,132,252,.08);
+  box-shadow:0 0 20px rgba(192,132,252,.1)
+}
+.mello-mode .score-row.active{border-color:rgba(167,139,250,.35);background:rgba(167,139,250,.08)}
+.wik-mode .score-row.active{border-color:rgba(103,232,249,.3);background:rgba(103,232,249,.07)}
+.score-name{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:2px;min-width:80px;color:var(--muted)}
+.score-row.active .score-name{color:var(--accent)}
+.mello-mode .score-row.active .score-name{color:var(--mello)}
+.wik-mode .score-row.active .score-name{color:var(--wik)}
+.score-tokens{font-size:.9rem;letter-spacing:1px}
+.score-cards{font-size:.78rem;color:var(--muted);margin-left:auto;font-weight:600;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px}
+.score-row.active .score-cards{color:var(--accent)}
+.mello-mode .score-row.active .score-cards{color:var(--mello)}
+.wik-mode .score-row.active .score-cards{color:var(--wik)}
+.pbar-out{height:2px;background:rgba(255,255,255,.06);width:100%;max-width:min(720px,calc(100vw - 32px));margin-bottom:8px;border-radius:100px}
+.pbar-in{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent),var(--accent3));border-radius:100px;transition:width .5s}
+.mello-mode .pbar-in{background:linear-gradient(90deg,#a78bfa,#c084fc,#f472b6)}
+.wik-mode .pbar-in{background:linear-gradient(90deg,#67e8f9,#34d399)}
+.decklabel{font-family:'Barlow Condensed',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:4px;color:var(--muted);text-align:center;margin-bottom:20px;text-transform:uppercase}
+
+.drawarea{display:flex;flex-direction:column;align-items:center;width:100%;max-width:480px;gap:12px}
+.deckvis{width:140px;height:175px;position:relative;cursor:pointer}
+.dc{
+  position:absolute;width:128px;height:162px;border-radius:18px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:2rem;color:rgba(192,132,252,.25);backdrop-filter:blur(8px)
+}
+.dc:nth-child(1){transform:rotate(-6deg) translate(-3px,3px)}
+.dc:nth-child(2){transform:rotate(-2deg) translate(1px,1px)}
+.dc:nth-child(3){transform:rotate(1deg);z-index:3;border-color:rgba(192,132,252,.3);box-shadow:0 0 20px rgba(192,132,252,.15)}
+
+.action-row{display:flex;gap:8px;width:100%}
+.abtn{
+  flex:1;border:none;border-radius:14px;padding:13px 10px;
+  font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;
+  cursor:pointer;transition:all .2s;text-align:center;text-transform:uppercase
+}
+.abtn-primary{background:linear-gradient(135deg,rgba(139,92,246,.65),rgba(99,102,241,.65));color:#fff;border:1px solid rgba(192,132,252,.3);backdrop-filter:blur(8px)}
+.abtn-primary:hover{background:linear-gradient(135deg,rgba(139,92,246,.85),rgba(99,102,241,.85));transform:translateY(-1px)}
+.mello-mode .abtn-primary{background:linear-gradient(135deg,rgba(167,139,250,.6),rgba(244,114,182,.6));border-color:rgba(167,139,250,.3)}
+.wik-mode .abtn-primary{background:linear-gradient(135deg,rgba(103,232,249,.4),rgba(52,211,153,.4));border-color:rgba(103,232,249,.3);color:#0a0015}
+.abtn-secondary{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(8px)}
+.abtn-secondary:hover{border-color:rgba(255,255,255,.2);color:var(--text)}
+.abtn-gold{background:rgba(251,191,36,.08);color:var(--gold);border:1px solid rgba(251,191,36,.2)}
+.abtn-gold:hover{background:rgba(251,191,36,.15)}
+.abtn-luck-bank{background:linear-gradient(135deg,rgba(52,211,153,.5),rgba(16,185,129,.5));color:#fff;border:1px solid rgba(52,211,153,.3)}
+.abtn-luck-bank:hover{background:linear-gradient(135deg,rgba(52,211,153,.7),rgba(16,185,129,.7))}
+.abtn:disabled{opacity:.25;cursor:not-allowed;transform:none}
+.luck-streak{
+  background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.2);
+  border-left:2px solid var(--yes);border-radius:0 12px 12px 0;
+  padding:10px 14px;font-family:'Barlow Condensed',sans-serif;font-size:.85rem;
+  font-weight:700;letter-spacing:1px;color:var(--yes);text-align:center;width:100%
+}
+
+.mystery-card{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);
+  border-radius:22px;padding:28px 32px;width:100%;max-width:480px;text-align:center;
+  position:relative;overflow:hidden;backdrop-filter:blur(20px);
+  box-shadow:0 8px 32px rgba(139,92,246,.12),inset 0 1px 0 rgba(255,255,255,.08)
+}
+.mystery-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(192,132,252,.8),rgba(103,232,249,.6),transparent)
+}
+.mystery-icon{font-size:3rem;display:block;margin-bottom:10px;filter:drop-shadow(0 0 12px rgba(192,132,252,.5))}
+.mystery-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:3px;color:var(--text);margin-bottom:4px}
+.mystery-sub{font-size:.82rem;color:var(--muted);margin-bottom:18px;line-height:1.6}
+.spotlink{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.25);
+  border-radius:12px;color:var(--yes);padding:12px 20px;
+  font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:3px;
+  cursor:pointer;margin:0 auto;text-decoration:none;transition:all .2s;
+  max-width:260px;width:100%;backdrop-filter:blur(8px)
+}
+.spotlink:hover{background:rgba(52,211,153,.2);border-color:var(--yes);box-shadow:0 0 20px rgba(52,211,153,.2)}
+
+.spotify-embed-wrap{
+  width:100%;border-radius:14px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.1);margin:0 auto;
+  position:relative;height:80px;background:#080010
+}
+.spotify-embed-wrap iframe{display:block;width:100%;height:80px;position:absolute;top:0;left:0}
+.spotify-cover{
+  position:absolute;top:0;left:0;right:80px;bottom:0;
+  background:#080010;z-index:2;pointer-events:none;
+  display:flex;align-items:center;justify-content:flex-start;
+  padding-left:16px;gap:10px
+}
+.spotify-cover::after{
+  content:'← TRYCK PLAY →';
+  font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:3px;
+  color:var(--muted)
+}
+
+.tl-wrap{width:100%;max-width:calc(100vw - 32px);position:relative}
+.tl-wrap::before,.tl-wrap::after{
+  content:'';position:absolute;top:0;bottom:0;width:40px;
+  pointer-events:none;z-index:2;opacity:0;transition:opacity .3s
+}
+.tl-wrap::before{left:0;background:linear-gradient(270deg,transparent,var(--bg));border-radius:0 0 0 14px}
+.tl-wrap::after{right:0;background:linear-gradient(90deg,transparent,var(--bg));border-radius:0 0 14px 0}
+.tl-wrap.can-scroll-left::before{opacity:.8}
+.tl-wrap.can-scroll-right::after{opacity:.8}
+.tl-label{
+  font-family:'Bebas Neue',sans-serif;font-size:.82rem;letter-spacing:3px;
+  color:var(--muted);text-align:center;margin-bottom:10px;text-transform:uppercase
+}
+.tl{display:flex;align-items:center;overflow-x:auto;padding:12px 8px;gap:5px;min-height:100px;-webkit-overflow-scrolling:touch;width:100%;scroll-behavior:smooth}
+.tl>:first-child{margin-left:auto}
+.tl>:last-child{margin-right:auto}
+.tc{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;padding:12px 14px;min-width:110px;max-width:160px;
+  text-align:center;flex:1 0 110px;backdrop-filter:blur(8px)
+}
+.tc.new{border-color:rgba(52,211,153,.45);background:rgba(52,211,153,.08);animation:popIn .25s ease;box-shadow:0 0 16px rgba(52,211,153,.15)}
+@keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.tca{font-family:'Barlow Condensed',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.5px;color:var(--text);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tct{font-size:.66rem;color:var(--muted);font-style:italic;margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tcy{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:2px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.mello-mode .tcy{background:linear-gradient(135deg,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.wik-mode .tcy{background:linear-gradient(135deg,#67e8f9,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.tc-mystery{
+  background:rgba(192,132,252,.08);border:1px solid rgba(192,132,252,.3);
+  border-radius:14px;padding:12px 14px;min-width:110px;max-width:160px;
+  text-align:center;flex:1 0 110px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;min-height:78px;box-shadow:0 0 16px rgba(192,132,252,.1)
+}
+.tc-mystery-icon{font-size:1.4rem;filter:drop-shadow(0 0 6px rgba(192,132,252,.6))}
+.tc-mystery-bets{font-size:.55rem;color:var(--accent);font-weight:700;letter-spacing:1px}
+.gap{
+  background:rgba(255,255,255,.03);border:2px dashed rgba(192,132,252,.25);border-radius:14px;
+  width:44px;min-width:44px;height:82px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--accent);font-size:.82rem;flex-shrink:0;transition:all .2s;
+  animation:gapPulse 2s ease-in-out infinite
+}
+@keyframes gapPulse{0%,100%{border-color:rgba(192,132,252,.2);box-shadow:none}50%{border-color:rgba(192,132,252,.45);box-shadow:0 0 10px rgba(192,132,252,.12)}}
+.gap:hover{background:rgba(192,132,252,.14);border-color:rgba(192,132,252,.55);color:var(--accent);border-style:solid;box-shadow:0 0 16px rgba(192,132,252,.2);animation:none}
+.gap:active{transform:scale(.92);background:rgba(192,132,252,.22)}
+.mello-mode .gap{animation-name:gapPulseMello}
+@keyframes gapPulseMello{0%,100%{border-color:rgba(167,139,250,.2);box-shadow:none}50%{border-color:rgba(167,139,250,.45);box-shadow:0 0 10px rgba(167,139,250,.12)}}
+.mello-mode .gap:hover{background:rgba(167,139,250,.12);border-color:rgba(167,139,250,.5);color:var(--mello)}
+.wik-mode .gap{animation-name:gapPulseWik}
+@keyframes gapPulseWik{0%,100%{border-color:rgba(103,232,249,.2);box-shadow:none}50%{border-color:rgba(103,232,249,.4);box-shadow:0 0 10px rgba(103,232,249,.12)}}
+.wik-mode .gap:hover{background:rgba(103,232,249,.1);border-color:rgba(103,232,249,.45);color:var(--wik)}
+.gap.taken{background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.2);border-style:solid;color:rgba(251,191,36,.4);cursor:default;font-size:.6rem;animation:none}
+.gap.taken:hover{transform:none;background:rgba(251,191,36,.05)}
+
+.challenge-panel{
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  border-radius:18px;padding:18px 20px;width:100%;max-width:480px;
+  backdrop-filter:blur(16px)
+}
+.panel-title{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:12px}
+.mello-mode .panel-title{color:var(--mello)}
+.wik-mode .panel-title{color:var(--wik)}
+.opp-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.07);gap:10px}
+.opp-row:last-child{border-bottom:none;padding-bottom:0}
+.opp-left{display:flex;flex-direction:column;gap:2px}
+.opp-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;font-size:.9rem;color:var(--text)}
+.opp-tokens{font-size:.7rem;color:var(--muted)}
+.opp-right{display:flex;gap:6px;align-items:center}
+.btn-challenge{
+  background:linear-gradient(135deg,rgba(139,92,246,.6),rgba(99,102,241,.6));
+  color:#fff;border:1px solid rgba(192,132,252,.3);border-radius:10px;
+  padding:7px 11px;font-family:'Bebas Neue',sans-serif;font-size:.85rem;
+  letter-spacing:2px;cursor:pointer;transition:all .2s;backdrop-filter:blur(8px)
+}
+.btn-challenge:hover{background:linear-gradient(135deg,rgba(139,92,246,.85),rgba(99,102,241,.85))}
+.btn-challenge:disabled{opacity:.25;cursor:not-allowed}
+.mello-mode .btn-challenge{background:linear-gradient(135deg,rgba(167,139,250,.6),rgba(244,114,182,.55));border-color:rgba(167,139,250,.3)}
+.wik-mode .btn-challenge{background:linear-gradient(135deg,rgba(103,232,249,.4),rgba(52,211,153,.4));border-color:rgba(103,232,249,.3);color:#0a0015}
+.btn-pass{background:none;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:7px 11px;font-family:'Barlow Condensed',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:1px;cursor:pointer;color:var(--muted);transition:all .2s}
+.btn-pass:hover{border-color:rgba(255,255,255,.2);color:var(--text)}
+.decided-badge{font-size:.72rem;padding:5px 10px;border-radius:10px;font-weight:700;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px}
+.decided-bet{background:rgba(192,132,252,.12);color:var(--accent);border:1px solid rgba(192,132,252,.2)}
+.mello-mode .decided-bet{background:rgba(167,139,250,.12);color:var(--mello)}
+.wik-mode .decided-bet{background:rgba(103,232,249,.1);color:var(--wik)}
+.decided-pass{color:var(--muted2)}
+
+.guess-panel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:18px 20px;width:100%;max-width:480px;backdrop-filter:blur(16px)}
+.guess-desc{font-size:.8rem;color:var(--muted);margin-bottom:12px;line-height:1.6}
+.guess-inputs{display:flex;flex-direction:column;gap:8px}
+.ginput{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 14px;color:var(--text);font-family:'Barlow',sans-serif;font-size:.9rem;outline:none;transition:all .2s;width:100%}
+.ginput:focus{border-color:rgba(192,132,252,.5);box-shadow:0 0 0 3px rgba(192,132,252,.1)}
+.mello-mode .ginput:focus{border-color:rgba(167,139,250,.5)}
+.wik-mode .ginput:focus{border-color:rgba(103,232,249,.5)}
+.ginput::placeholder{color:var(--muted2)}
+.guess-hint{font-size:.72rem;color:var(--muted2);margin-top:6px;font-style:italic}
+
+.flip-section{width:100%;max-width:480px;display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
+.flip-btn{
+  background:rgba(255,255,255,.08);color:var(--text);border:1px solid rgba(255,255,255,.15);
+  border-radius:14px;padding:15px;
+  font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:4px;
+  cursor:pointer;width:100%;transition:all .2s;text-transform:uppercase;backdrop-filter:blur(8px)
+}
+.flip-btn:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.25);transform:translateY(-1px)}
+.flip-btn:disabled{opacity:.25;cursor:not-allowed;transform:none}
+
+.reveal-area{display:flex;flex-direction:column;align-items:center;width:100%;max-width:480px;gap:12px}
+.reveal-card{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);
+  border-radius:22px;padding:24px 28px;width:100%;text-align:center;
+  position:relative;overflow:hidden;backdrop-filter:blur(20px);
+  box-shadow:0 8px 32px rgba(52,211,153,.08),inset 0 1px 0 rgba(255,255,255,.08)
+}
+.reveal-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(52,211,153,.7),rgba(103,232,249,.5),transparent)}
+.sbadge{
+  display:inline-block;background:rgba(192,132,252,.12);color:var(--accent);
+  font-family:'Bebas Neue',sans-serif;font-size:.75rem;letter-spacing:3px;
+  text-transform:uppercase;padding:5px 14px;border-radius:100px;margin-bottom:12px;
+  border:1px solid rgba(192,132,252,.25)
+}
+.mello-mode .sbadge{background:rgba(167,139,250,.12);color:var(--mello);border-color:rgba(167,139,250,.25)}
+.wik-mode .sbadge{background:rgba(103,232,249,.1);color:var(--wik);border-color:rgba(103,232,249,.2)}
+.sartist{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:3px;line-height:1;margin-bottom:4px;color:var(--text)}
+.stitle{font-size:.9rem;color:var(--muted);font-style:italic;margin-bottom:14px}
+.ylabel{font-family:'Barlow Condensed',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:4px;color:var(--muted);text-transform:uppercase}
+.syear{font-family:'Bebas Neue',sans-serif;font-size:4rem;letter-spacing:6px;
+  background:linear-gradient(135deg,#f0abfc,#818cf8,#67e8f9);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  display:block;line-height:1;margin-top:4px;filter:drop-shadow(0 0 20px rgba(192,132,252,.3))
+}
+.mello-mode .syear{background:linear-gradient(135deg,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.wik-mode .syear{background:linear-gradient(135deg,#67e8f9,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+.rbanner{border-radius:16px;padding:16px 20px;text-align:center;width:100%;border:1px solid}
+.rbanner.ok{background:rgba(52,211,153,.07);border-color:rgba(52,211,153,.25);border-left:2px solid var(--yes)}
+.rbanner.no{background:rgba(248,113,113,.07);border-color:rgba(248,113,113,.25);border-left:2px solid var(--no)}
+.rbanner.gold{background:rgba(251,191,36,.07);border-color:rgba(251,191,36,.2);border-left:2px solid var(--gold)}
+.remoji{font-size:1.6rem;display:block;margin-bottom:4px}
+.rtext{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:3px}
+.rbanner.ok .rtext{color:var(--yes)}
+.rbanner.no .rtext{color:var(--no)}
+.rbanner.gold .rtext{color:var(--gold)}
+.rsub{font-size:.82rem;color:var(--muted);margin-top:5px;line-height:1.5}
+
+.outcomes{display:flex;flex-direction:column;gap:5px;width:100%}
+.outcome-item{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:9px 14px;display:flex;justify-content:space-between;align-items:center;gap:8px;backdrop-filter:blur(8px)}
+.outcome-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.88rem;letter-spacing:.5px;color:var(--text)}
+.outcome-text{font-size:.78rem;text-align:right;line-height:1.4}
+.outcome-text.good{color:var(--yes);font-weight:600}
+.outcome-text.bad{color:var(--no);font-weight:600}
+.outcome-text.gold{color:var(--gold);font-weight:600}
+
+.nbtn{
+  background:rgba(255,255,255,.08);color:var(--text);
+  border:1px solid rgba(255,255,255,.15);border-radius:14px;
+  padding:15px 28px;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;
+  letter-spacing:4px;cursor:pointer;max-width:340px;width:100%;transition:all .2s;
+  text-transform:uppercase;backdrop-filter:blur(8px)
+}
+.nbtn:hover{background:rgba(255,255,255,.14);border-color:rgba(192,132,252,.35);transform:translateY(-1px)}
+
+.winscreen{text-align:center;max-width:420px;width:100%;padding:20px 0}
+.wtrophy{font-size:4rem;display:block;margin-bottom:16px;filter:drop-shadow(0 0 20px rgba(251,191,36,.5))}
+.wname{
+  font-family:'Bebas Neue',sans-serif;font-size:4rem;letter-spacing:4px;
+  background:linear-gradient(135deg,#f0abfc,#818cf8,#67e8f9);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:4px;line-height:1
+}
+.wsub{font-family:'Barlow Condensed',sans-serif;color:var(--muted);font-size:1rem;letter-spacing:2px;margin-bottom:40px;text-transform:uppercase;font-weight:600}
+
+.divider{width:100%;max-width:480px;height:1px;background:rgba(255,255,255,.07);margin:4px 0}
+
+.tc.unsecured{border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.05)}
+.tc.secured-star{border-color:rgba(251,191,36,.5);background:rgba(251,191,36,.08);box-shadow:0 0 12px rgba(251,191,36,.1)}
+.secured-star-badge{font-family:'Bebas Neue',sans-serif;font-size:.55rem;letter-spacing:1px;background:rgba(251,191,36,.1);color:var(--gold);border:1px solid rgba(251,191,36,.2);border-radius:6px;padding:1px 5px;display:block;margin-bottom:2px;text-transform:uppercase}
+
+.guess-confirm-panel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:20px;width:100%;text-align:center;margin-top:4px;backdrop-filter:blur(16px)}
+.gc-label{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:14px}
+.gc-btns{display:flex;flex-direction:column;gap:8px}
+.gc-btn{border:none;border-radius:12px;padding:14px 16px;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;cursor:pointer;transition:all .2s;text-transform:uppercase;width:100%;backdrop-filter:blur(8px)}
+.gc-star{background:rgba(251,191,36,.1);color:var(--gold);border:1px solid rgba(251,191,36,.25)}
+.gc-star:hover{background:rgba(251,191,36,.2);box-shadow:0 0 16px rgba(251,191,36,.15)}
+.gc-good{background:rgba(52,211,153,.08);color:var(--yes);border:1px solid rgba(52,211,153,.25)}
+.gc-good:hover{background:rgba(52,211,153,.15);box-shadow:0 0 16px rgba(52,211,153,.12)}
+.gc-bad{background:rgba(248,113,113,.07);color:var(--no);border:1px solid rgba(248,113,113,.2)}
+.gc-bad:hover{background:rgba(248,113,113,.14)}
+
+/* Mobile :active states — tap feedback */
+.pbtn:active,.abtn:active,.nbtn:active,.flip-btn:active{transform:scale(.97);filter:brightness(1.1)}
+.btn-challenge:active,.btn-pass:active{transform:scale(.95)}
+.gc-btn:active{transform:scale(.97)}
+.upload-btn:active{transform:scale(.93)}
+.spotlink:active{transform:scale(.97)}
+
+/* Pass-device handoff screen */
+.handoff-screen{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  width:100%;max-width:480px;padding:60px 20px;text-align:center;
+  animation:fadeIn .3s ease
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.handoff-icon{font-size:3.5rem;margin-bottom:16px;filter:drop-shadow(0 0 20px rgba(192,132,252,.4))}
+.handoff-name{
+  font-family:'Bebas Neue',sans-serif;font-size:2.8rem;letter-spacing:4px;
+  background:linear-gradient(135deg,#f0abfc,#818cf8,#67e8f9);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:6px;line-height:1
+}
+.mello-mode .handoff-name{background:linear-gradient(135deg,#a78bfa,#c084fc,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.wik-mode .handoff-name{background:linear-gradient(135deg,#67e8f9,#34d399,#a3e635);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.handoff-sub{font-family:'Barlow Condensed',sans-serif;font-size:.85rem;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:32px;font-weight:600}
+.handoff-btn{
+  background:linear-gradient(135deg,rgba(139,92,246,.65),rgba(99,102,241,.65));
+  color:#fff;border:1px solid rgba(192,132,252,.3);border-radius:16px;
+  padding:18px 40px;font-family:'Bebas Neue',sans-serif;font-size:1.2rem;
+  letter-spacing:4px;cursor:pointer;transition:all .2s;
+  backdrop-filter:blur(8px);box-shadow:0 4px 20px rgba(139,92,246,.25)
+}
+.handoff-btn:hover{background:linear-gradient(135deg,rgba(139,92,246,.9),rgba(99,102,241,.9));transform:translateY(-2px);box-shadow:0 6px 28px rgba(139,92,246,.4)}
+.handoff-btn:active{transform:scale(.97)}
+.mello-mode .handoff-btn{background:linear-gradient(135deg,rgba(167,139,250,.7),rgba(244,114,182,.7));border-color:rgba(167,139,250,.3)}
+.wik-mode .handoff-btn{background:linear-gradient(135deg,rgba(103,232,249,.5),rgba(52,211,153,.5));border-color:rgba(103,232,249,.3);color:#0a0015}
+
+/* Empty deck warning */
+.deck-empty{
+  background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.2);
+  border-left:2px solid var(--no);border-radius:0 14px 14px 0;
+  padding:16px 20px;text-align:center;width:100%;max-width:480px
+}
+.deck-empty-title{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:3px;color:var(--no);margin-bottom:4px}
+.deck-empty-sub{font-size:.82rem;color:var(--muted);line-height:1.5}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="logo" id="logoEl">RE<span>WIND</span></div>
+  <div class="sub" id="subEl">515 Svenska Hits · 1972–2023</div>
+  <div class="playlist-bar">
+    <div class="playlist-select-wrap">
+      <select id="playlistSelect" class="playlist-select"></select>
+    </div>
+    <label class="upload-btn" for="csvUpload" title="Ladda upp ny spellista (CSV från Exportify)">
+      <span>+</span>
+      <input type="file" id="csvUpload" accept=".csv" style="display:none">
+    </label>
+  </div>
+  <div id="root"></div>
+  <div id="persistent-player" style="display:none;width:100%;max-width:480px;margin:12px auto 0;padding:0 16px">
+    <div class="spotify-embed-wrap">
+      <iframe id="spotify-iframe"
+        src=""
+        width="100%" height="80" frameborder="0"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture">
+      </iframe>
+      <div class="spotify-cover"></div>
+    </div>
+  </div>
+</div>
+<script>
+// Dynamic playlists — starts with built-ins, grows via CSV upload
+const PLAYLISTS_DATA=[];
+let currentPlaylist=0; // index into PLAYLISTS_DATA
+
+function addPlaylist(key,label,songs){
+  PLAYLISTS_DATA.push({key,label,songs});
+  rebuildSelector();
+}
+
+function getSongs(){return [...PLAYLISTS_DATA[currentPlaylist].songs];}
+
+function rebuildSelector(){
+  const sel=document.getElementById('playlistSelect');
+  if(!sel)return;
+  sel.innerHTML=PLAYLISTS_DATA.map((p,i)=>
+    `<option value="${i}" ${i===currentPlaylist?'selected':''}>${p.label}</option>`
+  ).join('');
+}
+
+function setMode(idx){
+  currentPlaylist=+idx;
+  const p=PLAYLISTS_DATA[currentPlaylist];
+  if(!p)return;
+  const subEl=document.getElementById('subEl');
+  if(subEl) subEl.textContent=p.label.toUpperCase();
+  rebuildSelector();
+  applyTheme();
+  resetGame();render();
+}
+
+// Bind select
+document.addEventListener('DOMContentLoaded',()=>{
+  const sel=document.getElementById('playlistSelect');
+  if(sel) sel.addEventListener('change',e=>setMode(+e.target.value));
+  const up=document.getElementById('csvUpload');
+  if(up) up.addEventListener('change',handleCSVUpload);
+  rebuildSelector();
+  // Set initial sub label
+  const subEl=document.getElementById('subEl');
+  if(subEl&&PLAYLISTS_DATA[0]) subEl.textContent=PLAYLISTS_DATA[0].label.toUpperCase();
+  // Spotify cover is passive (pointer-events:none) — no click handler needed
+});
+
+function handleCSVUpload(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  const name=file.name.replace(/\.csv$/i,'').replace(/_/g,' ');
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const songs=parseExportifyCSV(ev.target.result);
+    if(!songs.length){alert('Kunde inte läsa CSV — använd Exportify-format.');return;}
+    addPlaylist('custom_'+Date.now(),name,songs);
+    setMode(PLAYLISTS_DATA.length-1);
+  };
+  reader.readAsText(file,'utf-8');
+  e.target.value='';
+}
+
+function parseExportifyCSV(text){
+  const lines=text.trim().split(/\r?\n/);
+  if(lines.length<2)return[];
+  // Handle BOM
+  const rawHeader=lines[0].replace(/^\uFEFF/,'');
+  const headers=parseCSVLine(rawHeader);
+  const uriIdx=headers.findIndex(h=>h.trim()==='Track URI');
+  const nameIdx=headers.findIndex(h=>h.trim()==='Track Name');
+  const artistIdx=headers.findIndex(h=>h.trim()==='Artist Name(s)');
+  const dateIdx=headers.findIndex(h=>h.trim()==='Release Date');
+  if(uriIdx<0||nameIdx<0||artistIdx<0||dateIdx<0)return[];
+  const seen=new Set();
+  const songs=[];
+  for(let i=1;i<lines.length;i++){
+    const cols=parseCSVLine(lines[i]);
+    if(cols.length<4)continue;
+    const uri=(cols[uriIdx]||'').replace('spotify:track:','').trim();
+    if(!uri||seen.has(uri))continue;
+    seen.add(uri);
+    const year=parseInt((cols[dateIdx]||'').slice(0,4));
+    if(!year||year<1900)continue;
+    songs.push({id:uri,artist:cols[artistIdx]||'',title:cols[nameIdx]||'',year,url:'spotify:track:'+uri});
+  }
+  return songs.sort((a,b)=>a.year-b.year);
+}
+
+function parseCSVLine(line){
+  const result=[];
+  let cur='',inQ=false;
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(c===','&&!inQ){result.push(cur.trim().replace(/^"|"$/g,''));cur='';}
+    else cur+=c;
+  }
+  result.push(cur.trim().replace(/^"|"$/g,''));
+  return result;
+}
+
+
+// Load built-in playlists
+addPlaylist('svenska','515 Svenska Hits · 1972–2023',[{"id": "7nBARurNPIRVcf81uOFz3i", "artist": "Fred Åkerström", "title": "Jag ger dig min morgon", "year": 1972, "url": "spotify:track:7nBARurNPIRVcf81uOFz3i"}, {"id": "3No0idjeViPyWDP4gh1YGo", "artist": "Ted Gärdestad", "title": "Jag ska fånga en ängel", "year": 1973, "url": "spotify:track:3No0idjeViPyWDP4gh1YGo"}, {"id": "7pvNKtULtDZcEAUBCjpykV", "artist": "Ted Gärdestad", "title": "Sol, vind och vatten", "year": 1973, "url": "spotify:track:7pvNKtULtDZcEAUBCjpykV"}, {"id": "1Taqw1VEHl8Gy9qAZtRLAq", "artist": "Ted Gärdestad", "title": "Oh, vilken härlig da'", "year": 1973, "url": "spotify:track:1Taqw1VEHl8Gy9qAZtRLAq"}, {"id": "0lwJH1BDr8Z4wfXvi6yC9y", "artist": "Ted Gärdestad", "title": "Sol, vind och vatten", "year": 1973, "url": "spotify:track:0lwJH1BDr8Z4wfXvi6yC9y"}, {"id": "4t9EUCjCPbdfqtOH25k8AU", "artist": "Harpo", "title": "Moviestar", "year": 1975, "url": "spotify:track:4t9EUCjCPbdfqtOH25k8AU"}, {"id": "38bqyFtEm3dozLeS55jVhG", "artist": "Tomas Ledin", "title": "Knivhuggarrock - Radio Edit", "year": 1975, "url": "spotify:track:38bqyFtEm3dozLeS55jVhG"}, {"id": "0GjEhVFGZW8afUYGChu3Rr", "artist": "ABBA", "title": "Dancing Queen", "year": 1976, "url": "spotify:track:0GjEhVFGZW8afUYGChu3Rr"}, {"id": "7wJRQOXkBv09WmHtJOgybL", "artist": "Magnus Uggla", "title": "Ska vi gå hem till dig", "year": 1977, "url": "spotify:track:7wJRQOXkBv09WmHtJOgybL"}, {"id": "6YXAhsg5NLuNyu03KhaTCD", "artist": "Trazan & Banarne", "title": "Balla Trazan Apansson - Musik 2", "year": 1977, "url": "spotify:track:6YXAhsg5NLuNyu03KhaTCD"}, {"id": "6Ajdsgapt2nwnKtCURpfaH", "artist": "Trazan & Banarne", "title": "Fantomens brallor - Musik", "year": 1977, "url": "spotify:track:6Ajdsgapt2nwnKtCURpfaH"}, {"id": "4cXRMnq7rBZb8giHALRJs6", "artist": "Tomas Ledin", "title": "I natt är jag din", "year": 1977, "url": "spotify:track:4cXRMnq7rBZb8giHALRJs6"}, {"id": "6tLjq4EtZvUSTg6QRtyCni", "artist": "Cornelis Vreeswijk", "title": "Turistens Klagan", "year": 1978, "url": "spotify:track:6tLjq4EtZvUSTg6QRtyCni"}, {"id": "4FOhTy0LCaIQ9e27cpUE7I", "artist": "Vikingarna", "title": "Leende guldbruna ögon", "year": 1978, "url": "spotify:track:4FOhTy0LCaIQ9e27cpUE7I"}, {"id": "7EFdBb3ao46AI9h9nhzLo1", "artist": "Secret Service", "title": "Oh Susie", "year": 1979, "url": "spotify:track:7EFdBb3ao46AI9h9nhzLo1"}, {"id": "3wsxQvaZK7uD0W57liT7sc", "artist": "Noice", "title": "En kväll i tunnelbanan", "year": 1979, "url": "spotify:track:3wsxQvaZK7uD0W57liT7sc"}, {"id": "0ePwcihuvC8nqlSDrmvOWD", "artist": "Lasse Berghagen", "title": "Gamma, gamma", "year": 1980, "url": "spotify:track:0ePwcihuvC8nqlSDrmvOWD"}, {"id": "663C0ATWeAc4r1wnHHz5SO", "artist": "Lasse Berghagen", "title": "När vi rör varann", "year": 1980, "url": "spotify:track:663C0ATWeAc4r1wnHHz5SO"}, {"id": "4rg0qXQd00nfQTTpu5U6sP", "artist": "Ted Gärdestad", "title": "Himlen är oskyldigt blå", "year": 1980, "url": "spotify:track:4rg0qXQd00nfQTTpu5U6sP"}, {"id": "2pa73fbZD7ltJ09AB0Teox", "artist": "Attack", "title": "Ooa hela natten", "year": 1981, "url": "spotify:track:2pa73fbZD7ltJ09AB0Teox"}, {"id": "2EKzS2s2VKnbQ7jxyk2WHi", "artist": "Gyllene Tider", "title": "När vi två blir en", "year": 1981, "url": "spotify:track:2EKzS2s2VKnbQ7jxyk2WHi"}, {"id": "2hCUmmNEYmmaZYWXONAx7D", "artist": "Mikael Wiehe", "title": "Flickan och kråkan", "year": 1981, "url": "spotify:track:2hCUmmNEYmmaZYWXONAx7D"}, {"id": "4Chq6k6Hmy2C4jjjtEr2BB", "artist": "Gyllene Tider", "title": "Ljudet av ett annat hjärta - 7\" Single", "year": 1981, "url": "spotify:track:4Chq6k6Hmy2C4jjjtEr2BB"}, {"id": "01vfSVYtIhFmd2aNBIhcvf", "artist": "Eddie Meduza", "title": "Volvo", "year": 1981, "url": "spotify:track:01vfSVYtIhFmd2aNBIhcvf"}, {"id": "3zgJHNEorjbLLThp6TiMhz", "artist": "Ebba Grön", "title": "800°", "year": 1981, "url": "spotify:track:3zgJHNEorjbLLThp6TiMhz"}, {"id": "62S2zK3Br4XVPmP9VoLcaa", "artist": "X-Models", "title": "Två av oss", "year": 1981, "url": "spotify:track:62S2zK3Br4XVPmP9VoLcaa"}, {"id": "1qAu9Y6Akd0CLAF6xLFtET", "artist": "Hansson de Wolfe United", "title": "Var kommer barnen in", "year": 1981, "url": "spotify:track:1qAu9Y6Akd0CLAF6xLFtET"}, {"id": "5CqLGYG9WPnvtCZurOfAx4", "artist": "Eddie Meduza", "title": "34:an", "year": 1981, "url": "spotify:track:5CqLGYG9WPnvtCZurOfAx4"}, {"id": "6lGwWivvLuHZxpdSdCKuFx", "artist": "Noice", "title": "Dolce vita (Det ljuva livet)", "year": 1981, "url": "spotify:track:6lGwWivvLuHZxpdSdCKuFx"}, {"id": "1d1BeKPNgaQ36wcxGqnfU3", "artist": "Gyllene Tider", "title": "Sommartider", "year": 1982, "url": "spotify:track:1d1BeKPNgaQ36wcxGqnfU3"}, {"id": "2W7tzqjAPXG97RthXx6pNR", "artist": "Tomas Ledin", "title": "Sommaren är kort", "year": 1982, "url": "spotify:track:2W7tzqjAPXG97RthXx6pNR"}, {"id": "4GgAm1IIj5mIUsA8ucKA0k", "artist": "Hasse Andersson", "title": "Änglahund", "year": 1982, "url": "spotify:track:4GgAm1IIj5mIUsA8ucKA0k"}, {"id": "27PplQBwDNIfESCPuesKMV", "artist": "Chattanooga", "title": "Hallå hela pressen", "year": 1982, "url": "spotify:track:27PplQBwDNIfESCPuesKMV"}, {"id": "3eTi07538vLOjDbFKbW7gU", "artist": "Lustans Lakejer", "title": "Diamanter är en flickas bästa vän - 1982 Single Version", "year": 1982, "url": "spotify:track:3eTi07538vLOjDbFKbW7gU"}, {"id": "32qGFJqweMFsGvsxRKgdjk", "artist": "Carola", "title": "Säg mig var du står", "year": 1983, "url": "spotify:track:32qGFJqweMFsGvsxRKgdjk"}, {"id": "06xX9E1BTTwyOwyaBuszSK", "artist": "Carola", "title": "Fångad av en stormvind - Swedish Version", "year": 1983, "url": "spotify:track:06xX9E1BTTwyOwyaBuszSK"}, {"id": "17zFOtbuquEAAxSttpfWWl", "artist": "Carola", "title": "Främling", "year": 1983, "url": "spotify:track:17zFOtbuquEAAxSttpfWWl"}, {"id": "2pLKsJoxz6zX27lIHuAXyj", "artist": "Carola", "title": "Mickey", "year": 1983, "url": "spotify:track:2pLKsJoxz6zX27lIHuAXyj"}, {"id": "7pMU7BiNFslXAM6T5b0PEY", "artist": "Carola", "title": "Gloria", "year": 1983, "url": "spotify:track:7pMU7BiNFslXAM6T5b0PEY"}, {"id": "4Fa1JAMAa8leM4TQnTiz83", "artist": "Magnus Uggla", "title": "Astrologen", "year": 1983, "url": "spotify:track:4Fa1JAMAa8leM4TQnTiz83"}, {"id": "63vK4u4uKwRD9KVJ5nHc46", "artist": "Carola", "title": "Tommy tycker om mig", "year": 1984, "url": "spotify:track:63vK4u4uKwRD9KVJ5nHc46"}, {"id": "4NzirQ4BrNkVaPEla2ipG4", "artist": "Herreys", "title": "Diggiloo Diggiley", "year": 1984, "url": "spotify:track:4NzirQ4BrNkVaPEla2ipG4"}, {"id": "4eJKkCCcp1ibRtNt50Y8J1", "artist": "Carola", "title": "På egna ben", "year": 1984, "url": "spotify:track:4eJKkCCcp1ibRtNt50Y8J1"}, {"id": "2cvgUpzXjHLtoE6P8SccL6", "artist": "Marie Fredriksson", "title": "Ännu doftar kärlek", "year": 1984, "url": "spotify:track:2cvgUpzXjHLtoE6P8SccL6"}, {"id": "43ZypSE73gRNdAySQTzyfs", "artist": "Herreys", "title": "Diggiloo Diggiley", "year": 1984, "url": "spotify:track:43ZypSE73gRNdAySQTzyfs"}, {"id": "0FSlaiuv4eBrrjz05jpxz6", "artist": "Kikki Danielsson", "title": "Bra vibrationer", "year": 1985, "url": "spotify:track:0FSlaiuv4eBrrjz05jpxz6"}, {"id": "4prmEJ4F7lHcBeumKk2PhH", "artist": "Pernilla Wahlgren", "title": "Picadilly Circus", "year": 1985, "url": "spotify:track:4prmEJ4F7lHcBeumKk2PhH"}, {"id": "3QCkwcUxBuXuidI8w4nIDn", "artist": "Kenneth & The Knutters", "title": "Våga välja växel", "year": 1985, "url": "spotify:track:3QCkwcUxBuXuidI8w4nIDn"}, {"id": "10EteXmTcnJLkMlkJap4Tj", "artist": "Michael B. Tretow", "title": "Professorn: Den makalösa manicken", "year": 1986, "url": "spotify:track:10EteXmTcnJLkMlkJap4Tj"}, {"id": "5OHcIW10h97ZoIH1PCsyRH", "artist": "Lasse Holm", "title": "Canelloni Macaroni", "year": 1986, "url": "spotify:track:5OHcIW10h97ZoIH1PCsyRH"}, {"id": "5MBBQ7P9AozcQ8lF7So1B3", "artist": "Lasse Holm;Monica Thörnell", "title": "E' de' det här du kallar kärlek", "year": 1986, "url": "spotify:track:5MBBQ7P9AozcQ8lF7So1B3"}, {"id": "2n8uATGqDeTAMivvR8HAar", "artist": "Trance Dance", "title": "Hoodoo Wanna Voodoo", "year": 1986, "url": "spotify:track:2n8uATGqDeTAMivvR8HAar"}, {"id": "01LWBjJwFdRSCeovqipb3D", "artist": "Peter Lundblad", "title": "Ta mig till havet", "year": 1986, "url": "spotify:track:01LWBjJwFdRSCeovqipb3D"}, {"id": "1gprScNuzOM4pOQuE2VQk7", "artist": "Style", "title": "Vill ha dej", "year": 1987, "url": "spotify:track:1gprScNuzOM4pOQuE2VQk7"}, {"id": "73ntNRkvOEuwWMiDZknqvy", "artist": "Style", "title": "Fantasi", "year": 1987, "url": "spotify:track:73ntNRkvOEuwWMiDZknqvy"}, {"id": "6eWs5GR8iLbolcOjj3gKjx", "artist": "Style", "title": "Dover-Calais", "year": 1987, "url": "spotify:track:6eWs5GR8iLbolcOjj3gKjx"}, {"id": "2KqY5Bvi0l2wNyWYpzzrDr", "artist": "Peter LeMarc", "title": "Håll om mej!", "year": 1987, "url": "spotify:track:2KqY5Bvi0l2wNyWYpzzrDr"}, {"id": "3cyRYEWw13jCQMerECnIHy", "artist": "Lili & Susie", "title": "Oh Mama", "year": 1987, "url": "spotify:track:3cyRYEWw13jCQMerECnIHy"}, {"id": "1e5ucTaqnN2YiD97AS6bqC", "artist": "Style", "title": "Hand i hand", "year": 1987, "url": "spotify:track:1e5ucTaqnN2YiD97AS6bqC"}, {"id": "70qifmOGYqU1IzRlA44Ovv", "artist": "Milla's Mirakel!", "title": "Rytmen av ett regn", "year": 1987, "url": "spotify:track:70qifmOGYqU1IzRlA44Ovv"}, {"id": "0LObyCN68g1m1YSs83rkkc", "artist": "Di Leva", "title": "Vem ska jag tro på?", "year": 1987, "url": "spotify:track:0LObyCN68g1m1YSs83rkkc"}, {"id": "5Jk7C8ukmT2GE4nq0xUOVE", "artist": "Uffe Persson", "title": "Nästa Weekend", "year": 1988, "url": "spotify:track:5Jk7C8ukmT2GE4nq0xUOVE"}, {"id": "4uBbgoKiRzcjgjVH6FqgTS", "artist": "Mauro Scocco", "title": "Sarah", "year": 1988, "url": "spotify:track:4uBbgoKiRzcjgjVH6FqgTS"}, {"id": "3JvHwqxypIl5i6e6pdwovk", "artist": "Grace", "title": "Ingen kan älska som vi", "year": 1988, "url": "spotify:track:3JvHwqxypIl5i6e6pdwovk"}, {"id": "6EKsuZE3BdlLOOgzSIma39", "artist": "Dag Vag", "title": "Popitop", "year": 1988, "url": "spotify:track:6EKsuZE3BdlLOOgzSIma39"}, {"id": "0ZfM5XfJTtFPhOxAERRnNY", "artist": "Roxette", "title": "The Look", "year": 1988, "url": "spotify:track:0ZfM5XfJTtFPhOxAERRnNY"}, {"id": "78TnMTAFmWUWWCgNXR7D3K", "artist": "Roxette", "title": "Listen To Your Heart", "year": 1988, "url": "spotify:track:78TnMTAFmWUWWCgNXR7D3K"}, {"id": "4UBYbC0qKvmUvgJgyDKJDV", "artist": "Suzzies Orkester", "title": "Dansar i månens sken", "year": 1988, "url": "spotify:track:4UBYbC0qKvmUvgJgyDKJDV"}, {"id": "0k48Ez6ShjafjB3OcIQmfp", "artist": "Kjell Höglund", "title": "Gennesarets sjö", "year": 1988, "url": "spotify:track:0k48Ez6ShjafjB3OcIQmfp"}, {"id": "7xObEpX35MQDqsLvtxsTf9", "artist": "Mauro Scocco", "title": "Hem Till Stockholm", "year": 1988, "url": "spotify:track:7xObEpX35MQDqsLvtxsTf9"}, {"id": "20P4WIsTo4HA5zO6krjhAp", "artist": "Orup", "title": "Jag blir hellre jagad av vargar", "year": 1988, "url": "spotify:track:20P4WIsTo4HA5zO6krjhAp"}, {"id": "1bTqHfhSfDNsAogFTYMIxT", "artist": "Freda'", "title": "Det måste gå", "year": 1988, "url": "spotify:track:1bTqHfhSfDNsAogFTYMIxT"}, {"id": "1doDrKXaIZDs3Q0ZiCBJw5", "artist": "Wilmer X", "title": "Teknikens under", "year": 1988, "url": "spotify:track:1doDrKXaIZDs3Q0ZiCBJw5"}, {"id": "45KlEPPU38wRcAjz1JhNuh", "artist": "Trance Dance", "title": "Don't Say Go", "year": 1988, "url": "spotify:track:45KlEPPU38wRcAjz1JhNuh"}, {"id": "0985mUC5n2eBXsX4YEaiTg", "artist": "Factory", "title": "Efter plugget", "year": 1989, "url": "spotify:track:0985mUC5n2eBXsX4YEaiTg"}, {"id": "6OjTQyRybsRv9GUmKKbAvp", "artist": "Jerry Williams", "title": "Did I Tell You", "year": 1989, "url": "spotify:track:6OjTQyRybsRv9GUmKKbAvp"}, {"id": "5gyPbAixchH4iPhqKWthfB", "artist": "Christer Sandelin", "title": "Det hon vill ha", "year": 1989, "url": "spotify:track:5gyPbAixchH4iPhqKWthfB"}, {"id": "1nrvksAMsxoiEbUkQyxOXo", "artist": "Jakob Hellman", "title": "Hon har ett sätt", "year": 1989, "url": "spotify:track:1nrvksAMsxoiEbUkQyxOXo"}, {"id": "2UDADgwsXreo0c6ylxzb2Y", "artist": "Eva Dahlgren", "title": "Ängeln i rummet", "year": 1989, "url": "spotify:track:2UDADgwsXreo0c6ylxzb2Y"}, {"id": "3zjtUYiQr0XkFuOd4AjLCq", "artist": "Orup", "title": "Då står pojkarna på rad", "year": 1989, "url": "spotify:track:3zjtUYiQr0XkFuOd4AjLCq"}, {"id": "5yVkWdTFlPrnUjnA24ta3M", "artist": "Eriksson Glenmark", "title": "Upp över mina öron", "year": 1989, "url": "spotify:track:5yVkWdTFlPrnUjnA24ta3M"}, {"id": "1JAy2eD5rhtvBo4xEMB9BS", "artist": "Niklas Strömstedt", "title": "Sista morgonen", "year": 1989, "url": "spotify:track:1JAy2eD5rhtvBo4xEMB9BS"}, {"id": "0nPNQ84kh7WJtoyW1PyHPN", "artist": "Troll", "title": "Jimmy Dean", "year": 1989, "url": "spotify:track:0nPNQ84kh7WJtoyW1PyHPN"}, {"id": "6a41rCqZhb2W6rpMolDR08", "artist": "Jakob Hellman", "title": "Vara vänner", "year": 1989, "url": "spotify:track:6a41rCqZhb2W6rpMolDR08"}, {"id": "1YEwlI2aCKITozVudLxrBs", "artist": "Orup", "title": "Regn hos mej", "year": 1989, "url": "spotify:track:1YEwlI2aCKITozVudLxrBs"}, {"id": "7C8NhwOrNbsqi9YcF2rstE", "artist": "Magnus Uggla", "title": "Jag mår illa", "year": 1989, "url": "spotify:track:7C8NhwOrNbsqi9YcF2rstE"}, {"id": "6xYeTISkTw4S9K9hJgr1KJ", "artist": "Lasse Berghagen", "title": "En kväll i juni", "year": 1989, "url": "spotify:track:6xYeTISkTw4S9K9hJgr1KJ"}, {"id": "3tgDP0BTRP10i4HkLlAER3", "artist": "Niklas Strömstedt", "title": "Om", "year": 1990, "url": "spotify:track:3tgDP0BTRP10i4HkLlAER3"}, {"id": "4ZALd5LmXSciq8xuorcS0K", "artist": "Tomas Ledin", "title": "Hon gör allt för att göra mig lycklig", "year": 1990, "url": "spotify:track:4ZALd5LmXSciq8xuorcS0K"}, {"id": "0gQtd0FQjuJSsuK2qHFYoF", "artist": "Tomas Ledin", "title": "En del av mitt hjärta", "year": 1990, "url": "spotify:track:0gQtd0FQjuJSsuK2qHFYoF"}, {"id": "5LAnTrLaN2SzUfWOglKPIy", "artist": "Eddie Meduza", "title": "Midsommarnatt", "year": 1990, "url": "spotify:track:5LAnTrLaN2SzUfWOglKPIy"}, {"id": "4R61dwj0qyIRDhfMnqMupz", "artist": "Anders Glenmark", "title": "Hon har blommor i sitt hår", "year": 1990, "url": "spotify:track:4R61dwj0qyIRDhfMnqMupz"}, {"id": "5odXFIUE5YFAbA7iEdL0w8", "artist": "Björn Afzelius", "title": "Tusen bitar", "year": 1990, "url": "spotify:track:5odXFIUE5YFAbA7iEdL0w8"}, {"id": "26KifbUCspxMeEm2XJz34g", "artist": "Trance Dance", "title": "You're Gonna Get It - Lust In The Dust Mix", "year": 1990, "url": "spotify:track:26KifbUCspxMeEm2XJz34g"}, {"id": "6pmvLkU9V33O9menHYyprl", "artist": "Anders Glenmark", "title": "Hon sa", "year": 1990, "url": "spotify:track:6pmvLkU9V33O9menHYyprl"}, {"id": "5UC6JqZnGgTzKk0NM3xhZr", "artist": "Loa Falkman", "title": "Symfonin", "year": 1990, "url": "spotify:track:5UC6JqZnGgTzKk0NM3xhZr"}, {"id": "4fwOeFfLQoTjEsldLpDngl", "artist": "Pelle Almgren;Wow Liksom", "title": "Omåomigen", "year": 1991, "url": "spotify:track:4fwOeFfLQoTjEsldLpDngl"}, {"id": "0xljZqZHvXhVfse33fQ9bK", "artist": "Eva Dahlgren", "title": "Vem tänder stjärnorna", "year": 1991, "url": "spotify:track:0xljZqZHvXhVfse33fQ9bK"}, {"id": "31AMbxkc5KHNtBSmuNww60", "artist": "Mauro Scocco", "title": "Till dom ensamma", "year": 1991, "url": "spotify:track:31AMbxkc5KHNtBSmuNww60"}, {"id": "3fJ1e53JKuL4l5Cph4I0ab", "artist": "Eva Dahlgren", "title": "Kom och håll om mej", "year": 1991, "url": "spotify:track:3fJ1e53JKuL4l5Cph4I0ab"}, {"id": "2ruSkslWgiaYiGhxyqFYwS", "artist": "Anders Glenmark", "title": "Mare Mare", "year": 1991, "url": "spotify:track:2ruSkslWgiaYiGhxyqFYwS"}, {"id": "3cKBBVTTz9jY2A0HBqNdPQ", "artist": "Irma", "title": "Precis som du", "year": 1991, "url": "spotify:track:3cKBBVTTz9jY2A0HBqNdPQ"}, {"id": "16xd1M5MtH2a3PsMusOyM1", "artist": "Peter LeMarc", "title": "Ett av dom sätt", "year": 1991, "url": "spotify:track:16xd1M5MtH2a3PsMusOyM1"}, {"id": "4XoOCFKvikhwp0UcpBwJsO", "artist": "Angel", "title": "Sommaren i City", "year": 1992, "url": "spotify:track:4XoOCFKvikhwp0UcpBwJsO"}, {"id": "3VsMDGtaLvkctJieuQ0qzA", "artist": "Peps Persson", "title": "Oh boy", "year": 1992, "url": "spotify:track:3VsMDGtaLvkctJieuQ0qzA"}, {"id": "7DqyeESnaKCwDjgmA45UFZ", "artist": "Christer Björkman", "title": "I morgon är en annan dag", "year": 1992, "url": "spotify:track:7DqyeESnaKCwDjgmA45UFZ"}, {"id": "6VKZGo3YyFeoU9sENXERz0", "artist": "Snowstorm", "title": "Sommarnatt", "year": 1992, "url": "spotify:track:6VKZGo3YyFeoU9sENXERz0"}, {"id": "3uhF5EBcuqqXELlszBhIOy", "artist": "Lisa Nilsson", "title": "Himlen runt hörnet", "year": 1992, "url": "spotify:track:3uhF5EBcuqqXELlszBhIOy"}, {"id": "1eQbty3NNMMmGiFFEwdxjV", "artist": "Orup", "title": "Magaluf", "year": 1992, "url": "spotify:track:1eQbty3NNMMmGiFFEwdxjV"}, {"id": "5rWyQmUb7eBoxC6oHTJNBW", "artist": "Eva Dahlgren", "title": "Jag klär av mig naken", "year": 1992, "url": "spotify:track:5rWyQmUb7eBoxC6oHTJNBW"}, {"id": "65yylycZ36rlCyXstyz36z", "artist": "David Shutrick", "title": "Container", "year": 1992, "url": "spotify:track:65yylycZ36rlCyXstyz36z"}, {"id": "7KNVBpQ37GjkAb4YabNLJr", "artist": "Farbror Blå", "title": "Du är min drog", "year": 1992, "url": "spotify:track:7KNVBpQ37GjkAb4YabNLJr"}, {"id": "4QZ6hp2CKRaZG5RI9zXQqg", "artist": "Arvingarna", "title": "Eloise", "year": 1993, "url": "spotify:track:4QZ6hp2CKRaZG5RI9zXQqg"}, {"id": "09o8YE3Ta7YRXh5NI9HPZQ", "artist": "Ronny & Ragge", "title": "Rara söta Anna", "year": 1993, "url": "spotify:track:09o8YE3Ta7YRXh5NI9HPZQ"}, {"id": "454J9ZekfjmjWbfcpFaur3", "artist": "Perikles", "title": "Var ska vi sova inatt", "year": 1993, "url": "spotify:track:454J9ZekfjmjWbfcpFaur3"}, {"id": "6IUQMT0yDbYnYTUO37lJZ6", "artist": "Magnus Uggla", "title": "Dansar aldrig nykter", "year": 1993, "url": "spotify:track:6IUQMT0yDbYnYTUO37lJZ6"}, {"id": "6V0PuoOnfCWJuC6fD11YIL", "artist": "Europe", "title": "The Final Countdown", "year": 1993, "url": "spotify:track:6V0PuoOnfCWJuC6fD11YIL"}, {"id": "4enF8mIoBKWLB4R2Gau6Zc", "artist": "Ronny & Ragge", "title": "Köra fort som fan", "year": 1993, "url": "spotify:track:4enF8mIoBKWLB4R2Gau6Zc"}, {"id": "4sg7gEGKzmZdG0ntV0tTD5", "artist": "Europe", "title": "Carrie", "year": 1993, "url": "spotify:track:4sg7gEGKzmZdG0ntV0tTD5"}, {"id": "0EWaUpAQtTWET3E14ye6ZV", "artist": "Ronny & Ragge", "title": "Dé é sommar", "year": 1993, "url": "spotify:track:0EWaUpAQtTWET3E14ye6ZV"}, {"id": "3ngXQEAhRfEEywnTHtqhfi", "artist": "Europe", "title": "Rock the Night", "year": 1993, "url": "spotify:track:3ngXQEAhRfEEywnTHtqhfi"}, {"id": "2QKpgTRxmz1JE3S5yWxLYr", "artist": "Europe", "title": "Cherokee", "year": 1993, "url": "spotify:track:2QKpgTRxmz1JE3S5yWxLYr"}, {"id": "4zNU3rEJKnUk1HGSTK5Aa9", "artist": "Louise Hoffsten", "title": "Hit Me With Your Lovething", "year": 1993, "url": "spotify:track:4zNU3rEJKnUk1HGSTK5Aa9"}, {"id": "1GxJnuQ9eCOAtF6LbhVb1n", "artist": "De Lyckliga Kompisarna", "title": "Ishockeyfrisyr", "year": 1993, "url": "spotify:track:1GxJnuQ9eCOAtF6LbhVb1n"}, {"id": "0lKCCB98LLz8hdCeSyoxdU", "artist": "Louise Hoffsten", "title": "Let the Best Man Win", "year": 1993, "url": "spotify:track:0lKCCB98LLz8hdCeSyoxdU"}, {"id": "6kWJvPfC4DgUpRsXKNa9z9", "artist": "Ace of Base", "title": "All That She Wants", "year": 1993, "url": "spotify:track:6kWJvPfC4DgUpRsXKNa9z9"}, {"id": "3tMyQthmPaqMf1YpHdWlHX", "artist": "Kayo", "title": "Om natten", "year": 1993, "url": "spotify:track:3tMyQthmPaqMf1YpHdWlHX"}, {"id": "5Ws6u3a6SibPmJazXdEAHB", "artist": "Arvingarna", "title": "Eloise", "year": 1993, "url": "spotify:track:5Ws6u3a6SibPmJazXdEAHB"}, {"id": "5AGXO3iao804D7WuOm0Lyl", "artist": "Carola", "title": "Sanna vänner", "year": 1994, "url": "spotify:track:5AGXO3iao804D7WuOm0Lyl"}, {"id": "7rbwpXPzDkbzxFb9PQY8XN", "artist": "Galenskaparna & After Shave", "title": "Husvagn", "year": 1994, "url": "spotify:track:7rbwpXPzDkbzxFb9PQY8XN"}, {"id": "7E9rcVjE66zO7p4IwyhjBC", "artist": "Uno Svenningsson", "title": "Under ytan", "year": 1994, "url": "spotify:track:7E9rcVjE66zO7p4IwyhjBC"}, {"id": "03CuKm1ugqpOYDukfxQlT0", "artist": "Nordman", "title": "Vandraren", "year": 1994, "url": "spotify:track:03CuKm1ugqpOYDukfxQlT0"}, {"id": "1BBIW3lDfwK9PXOFOedZmo", "artist": "E-Type", "title": "This Is The Way - Radio Edit", "year": 1994, "url": "spotify:track:1BBIW3lDfwK9PXOFOedZmo"}, {"id": "7JiihoVvi5LWBUr2x45ASM", "artist": "Uno Svenningsson;Eva Dahlgren", "title": "Tro på varann", "year": 1994, "url": "spotify:track:7JiihoVvi5LWBUr2x45ASM"}, {"id": "1N57gaReHnIlmZ010zbUhd", "artist": "Galenskaparna & After Shave", "title": "Macken", "year": 1994, "url": "spotify:track:1N57gaReHnIlmZ010zbUhd"}, {"id": "0oKOAL9nhFMieApXNLYkZ8", "artist": "Lisa Ekdahl", "title": "Vem vet?", "year": 1994, "url": "spotify:track:0oKOAL9nhFMieApXNLYkZ8"}, {"id": "29fNIVCogo4jpvKgTtIwyb", "artist": "Tommy Nilsson", "title": "Öppna din dörr", "year": 1995, "url": "spotify:track:29fNIVCogo4jpvKgTtIwyb"}, {"id": "7bVwUOySQGO2afJ0LArAMi", "artist": "Tommy Körberg", "title": "Stad i ljus", "year": 1995, "url": "spotify:track:7bVwUOySQGO2afJ0LArAMi"}, {"id": "3iAJRvvn8pywXZtvBNNP71", "artist": "Glenmark Eriksson Strömstedt", "title": "När vi gräver guld i USA", "year": 1995, "url": "spotify:track:3iAJRvvn8pywXZtvBNNP71"}, {"id": "4ZJNkwzMJJLB7RpLzPcQtn", "artist": "Drängarna", "title": "Vill du bli min fru", "year": 1995, "url": "spotify:track:4ZJNkwzMJJLB7RpLzPcQtn"}, {"id": "1WVjxyTSZ5UiI6TlcHyUPh", "artist": "Ulf Lundell", "title": "Öppna landskap", "year": 1995, "url": "spotify:track:1WVjxyTSZ5UiI6TlcHyUPh"}, {"id": "3lLh4EHR2PBdmBFrMDIIuC", "artist": "Peter LeMarc", "title": "Tess", "year": 1995, "url": "spotify:track:3lLh4EHR2PBdmBFrMDIIuC"}, {"id": "6sDc7xKVYe28DdASxT4FxR", "artist": "Glenmark Eriksson Strömstedt", "title": "En jävel på kärlek", "year": 1995, "url": "spotify:track:6sDc7xKVYe28DdASxT4FxR"}, {"id": "7M57AuAeA5M4lnWqpUGRIR", "artist": "Peter LeMarc", "title": "Little Willie John - Version", "year": 1995, "url": "spotify:track:7M57AuAeA5M4lnWqpUGRIR"}, {"id": "5BOCw5gzCsPvlwVPJ7Eulh", "artist": "Ulf Lundell", "title": "(Oh la la) Jag vill ha dej", "year": 1995, "url": "spotify:track:5BOCw5gzCsPvlwVPJ7Eulh"}, {"id": "5E0DPn2m1oAigfof05lKmJ", "artist": "Jan Johansen", "title": "Se på mig", "year": 1995, "url": "spotify:track:5E0DPn2m1oAigfof05lKmJ"}, {"id": "7lSwzsGSqiVuidQ113ilqO", "artist": "Drängarna", "title": "Vill Du Bli Min Fru", "year": 1995, "url": "spotify:track:7lSwzsGSqiVuidQ113ilqO"}, {"id": "587jp7jaczAz6M3wnKmnFh", "artist": "Björn Rosenström", "title": "Raggarrock (Pojkarna som busar)", "year": 1995, "url": "spotify:track:587jp7jaczAz6M3wnKmnFh"}, {"id": "7MYC1Le5vcjyw0yBAQGVyB", "artist": "kent", "title": "Gravitation", "year": 1996, "url": "spotify:track:7MYC1Le5vcjyw0yBAQGVyB"}, {"id": "0TYwFP4MxszHAXAJMYhi3E", "artist": "One More Time", "title": "Den vilda", "year": 1996, "url": "spotify:track:0TYwFP4MxszHAXAJMYhi3E"}, {"id": "4LhNXZuh5AW19h6ptCmbVU", "artist": "Ronny Rooster", "title": "Köttbullelåten", "year": 1996, "url": "spotify:track:4LhNXZuh5AW19h6ptCmbVU"}, {"id": "6AvK18xgjLRGM2aKqe5rBW", "artist": "Magnus Uggla", "title": "Kung för en dag", "year": 1997, "url": "spotify:track:6AvK18xgjLRGM2aKqe5rBW"}, {"id": "5eJ314ozT4CTPlyjdsGq78", "artist": "kent", "title": "Utan dina andetag", "year": 1997, "url": "spotify:track:5eJ314ozT4CTPlyjdsGq78"}, {"id": "2LoC5OOwNjf5MguZoJKPBf", "artist": "Tone Norum;Tommy Nilsson", "title": "Allt som jag känner", "year": 1997, "url": "spotify:track:2LoC5OOwNjf5MguZoJKPBf"}, {"id": "72qwRwnHNGCnn8sFlVOwr4", "artist": "Meja", "title": "All 'Bout the Money", "year": 1997, "url": "spotify:track:72qwRwnHNGCnn8sFlVOwr4"}, {"id": "5dEHUYf0NkT1pZeEJOCMsW", "artist": "Blond", "title": "Bara hon älskar mig", "year": 1997, "url": "spotify:track:5dEHUYf0NkT1pZeEJOCMsW"}, {"id": "61hgZt5HEewtSjxibp01Vy", "artist": "Janne Lucas", "title": "Växeln hallå", "year": 1997, "url": "spotify:track:61hgZt5HEewtSjxibp01Vy"}, {"id": "2hdhm6piUJnmKXmEmskXCg", "artist": "Eagle-Eye Cherry", "title": "Save Tonight", "year": 1997, "url": "spotify:track:2hdhm6piUJnmKXmEmskXCg"}, {"id": "4aJ1AoiwjzsOxWqabRTJd3", "artist": "Chips", "title": "Dag efter dag", "year": 1997, "url": "spotify:track:4aJ1AoiwjzsOxWqabRTJd3"}, {"id": "4ob0J0F6Hi4lJhPUE1O49i", "artist": "Stefan Andersson", "title": "Bröllopsvals", "year": 1997, "url": "spotify:track:4ob0J0F6Hi4lJhPUE1O49i"}, {"id": "1teO1SPOqr2lRb49ayjy4e", "artist": "Magnus Uggla", "title": "Kung för en dag", "year": 1997, "url": "spotify:track:1teO1SPOqr2lRb49ayjy4e"}, {"id": "0gDuGPOhdmbNQZ0OCeBFzQ", "artist": "Markoolio", "title": "Sommar Och Sol", "year": 1998, "url": "spotify:track:0gDuGPOhdmbNQZ0OCeBFzQ"}, {"id": "3KIUjBZoo13uUWBtbWcPCP", "artist": "Graaf", "title": "You Got (What I Want)", "year": 1998, "url": "spotify:track:3KIUjBZoo13uUWBtbWcPCP"}, {"id": "7affuyDflV8wvNI4UhuHjX", "artist": "Petter", "title": "Mikrofonkåt", "year": 1998, "url": "spotify:track:7affuyDflV8wvNI4UhuHjX"}, {"id": "1RumnunzRSwsoQAfBlIxHz", "artist": "Petter", "title": "Vinden har vänt", "year": 1998, "url": "spotify:track:1RumnunzRSwsoQAfBlIxHz"}, {"id": "1ecJdAizaDklfgCVtEUQsG", "artist": "Freestyle", "title": "Vill ha dig", "year": 1998, "url": "spotify:track:1ecJdAizaDklfgCVtEUQsG"}, {"id": "0lsq7NTrVmyJDaVbSlyKW4", "artist": "Markoolio", "title": "Vi Drar Till Fjällen", "year": 1998, "url": "spotify:track:0lsq7NTrVmyJDaVbSlyKW4"}, {"id": "0Dx8AhXPvKq1iRGiaAfflE", "artist": "Patrik Isaksson", "title": "Hos dig är jag underbar", "year": 1999, "url": "spotify:track:0Dx8AhXPvKq1iRGiaAfflE"}, {"id": "3uELTbXsxWHgG4D0ORehKr", "artist": "Petter;Eye N'I", "title": "Såklart! (feat. Eye N'I)", "year": 1999, "url": "spotify:track:3uELTbXsxWHgG4D0ORehKr"}, {"id": "37FExmduN77uY4Y1h7Fqlv", "artist": "Martin", "title": "(Du Ar Sa) Yeah Yeah, Wow Wow", "year": 1999, "url": "spotify:track:37FExmduN77uY4Y1h7Fqlv"}, {"id": "7fsWDVy88i6gznoQtlbOio", "artist": "Martin", "title": "(Du är så) Yeah Yeah, Wow Wow", "year": 1999, "url": "spotify:track:7fsWDVy88i6gznoQtlbOio"}, {"id": "6JIwvW8ioos5KFp0Q0mS3Y", "artist": "Charlotte Perrelli", "title": "Tusen och en natt", "year": 1999, "url": "spotify:track:6JIwvW8ioos5KFp0Q0mS3Y"}, {"id": "1nSyBcZr8IS9wZcFyvqqE7", "artist": "Roger Pontare", "title": "När vindarna viskar mitt namn", "year": 2000, "url": "spotify:track:1nSyBcZr8IS9wZcFyvqqE7"}, {"id": "3OZeNQnM7WOgsKv7F8gU1q", "artist": "Joakim Hillson", "title": "Vacker utan spackel", "year": 2000, "url": "spotify:track:3OZeNQnM7WOgsKv7F8gU1q"}, {"id": "4LZhxPSsWW6djAWn9IaI2F", "artist": "Gyllene Tider", "title": "Gå och fiska", "year": 2000, "url": "spotify:track:4LZhxPSsWW6djAWn9IaI2F"}, {"id": "33jSLvAfP8pQ321WHh3eRW", "artist": "Gyllene Tider", "title": "Kung av sand", "year": 2000, "url": "spotify:track:33jSLvAfP8pQ321WHh3eRW"}, {"id": "2yz5IaQLnO8WBCIWMXoRBS", "artist": "Håkan Hellström", "title": "Känn ingen sorg för mig Göteborg", "year": 2000, "url": "spotify:track:2yz5IaQLnO8WBCIWMXoRBS"}, {"id": "7CnmrH37yHub8PoKFaGUo5", "artist": "Cue", "title": "Burnin'", "year": 2000, "url": "spotify:track:7CnmrH37yHub8PoKFaGUo5"}, {"id": "2mZytC75behVWAgnKztwrq", "artist": "Orup", "title": "Unga Hjärtan", "year": 2000, "url": "spotify:track:2mZytC75behVWAgnKztwrq"}, {"id": "1Yc4z9MWH2gtGzLY2RjGqW", "artist": "kent", "title": "Utan dina andetag", "year": 2000, "url": "spotify:track:1Yc4z9MWH2gtGzLY2RjGqW"}, {"id": "27TFfAFo4sE4fw04QDqJmD", "artist": "Ted Gärdestad", "title": "Himlen är oskyldigt blå", "year": 2001, "url": "spotify:track:27TFfAFo4sE4fw04QDqJmD"}, {"id": "07xadss9HQVQ0g3C9iryRu", "artist": "Pistvakt", "title": "2, 4, 6, 8 Bäverhojt / 2, 4, 6, 8 Motor Way", "year": 2001, "url": "spotify:track:07xadss9HQVQ0g3C9iryRu"}, {"id": "2LFurEZhXhTVmr5MpW50uE", "artist": "Shebang", "title": "Romeo", "year": 2001, "url": "spotify:track:2LFurEZhXhTVmr5MpW50uE"}, {"id": "0trhh9FnFYNZ7ZOQH1d35U", "artist": "Ted Gärdestad", "title": "För kärlekens skull", "year": 2001, "url": "spotify:track:0trhh9FnFYNZ7ZOQH1d35U"}, {"id": "0T51GzrPjiYd9rCJHomzJe", "artist": "Markoolio", "title": "Jag orkar inte mer", "year": 2001, "url": "spotify:track:0T51GzrPjiYd9rCJHomzJe"}, {"id": "6mPvmqLqpQPgYAfUFKcMeX", "artist": "Uno Svenningsson", "title": "Vågorna", "year": 2001, "url": "spotify:track:6mPvmqLqpQPgYAfUFKcMeX"}, {"id": "4BhEDrbVxPgu13SQFwoDCV", "artist": "Friends", "title": "Lyssna till ditt hjärta", "year": 2001, "url": "spotify:track:4BhEDrbVxPgu13SQFwoDCV"}, {"id": "2xrdPQ9t66LGmiA6R59POo", "artist": "Lisa Miskovsky", "title": "Driving One Of Your Cars", "year": 2001, "url": "spotify:track:2xrdPQ9t66LGmiA6R59POo"}, {"id": "724ltX0NuMww2BeLaZf9Mh", "artist": "Weeping Willows", "title": "Touch Me", "year": 2001, "url": "spotify:track:724ltX0NuMww2BeLaZf9Mh"}, {"id": "7cS8Z27XiJmHQfi7f2jKBZ", "artist": "Fattaru;Henok", "title": "Mina Hundar", "year": 2001, "url": "spotify:track:7cS8Z27XiJmHQfi7f2jKBZ"}, {"id": "289MVUwbkPCYwhIQilnynK", "artist": "Markoolio", "title": "Jag Orkar Inte Mer", "year": 2001, "url": "spotify:track:289MVUwbkPCYwhIQilnynK"}, {"id": "5YCKObb1A7YIeOKzXhREwz", "artist": "kent", "title": "Pärlor", "year": 2002, "url": "spotify:track:5YCKObb1A7YIeOKzXhREwz"}, {"id": "5h3lMSx5ez1pffRQHGzgm7", "artist": "kent", "title": "Dom andra", "year": 2002, "url": "spotify:track:5h3lMSx5ez1pffRQHGzgm7"}, {"id": "4mKXtd5wOFqk4ay32Bwwff", "artist": "Östen Med Resten", "title": "Hon Kommer Med Solsken", "year": 2002, "url": "spotify:track:4mKXtd5wOFqk4ay32Bwwff"}, {"id": "68nBmKpvy3FecJG1HDtMcO", "artist": "Brolle", "title": "Playing With Fire", "year": 2002, "url": "spotify:track:68nBmKpvy3FecJG1HDtMcO"}, {"id": "7JTaPgK7sLhTZoJfUR73kB", "artist": "Ratata", "title": "Jackie", "year": 2002, "url": "spotify:track:7JTaPgK7sLhTZoJfUR73kB"}, {"id": "3JIOkz5QLH2UjSMzeoGCH2", "artist": "Cecilia Vennersten", "title": "Det Vackraste", "year": 2002, "url": "spotify:track:3JIOkz5QLH2UjSMzeoGCH2"}, {"id": "4HecwIfui1kQYNC2q2d1Mu", "artist": "Lasse Berghagen", "title": "Teddybjörnen Fredriksson", "year": 2002, "url": "spotify:track:4HecwIfui1kQYNC2q2d1Mu"}, {"id": "4wLWZx74WHOosQq5p8VVkL", "artist": "Sarek", "title": "Genom Eld & Vatten", "year": 2003, "url": "spotify:track:4wLWZx74WHOosQq5p8VVkL"}, {"id": "3dyHvTXrfU6wZbuxl6h3H3", "artist": "Per Gessle", "title": "Här kommer alla känslorna (på en och samma gång)", "year": 2003, "url": "spotify:track:3dyHvTXrfU6wZbuxl6h3H3"}, {"id": "2YAeOvFOFeWPst165ReDg5", "artist": "Da Buzz", "title": "Alive", "year": 2003, "url": "spotify:track:2YAeOvFOFeWPst165ReDg5"}, {"id": "5ihzUJ7thrM9pjPe2NZRRq", "artist": "Ratata;Frida", "title": "Så länge vi har varann", "year": 2003, "url": "spotify:track:5ihzUJ7thrM9pjPe2NZRRq"}, {"id": "3ZFmytdiIda4hXObbBO5c6", "artist": "Per Gessle", "title": "Tycker om när du tar på mig", "year": 2003, "url": "spotify:track:3ZFmytdiIda4hXObbBO5c6"}, {"id": "49OimCzeIacaDPsdKGlYKt", "artist": "Glenmark Eriksson Strömstedt", "title": "Sångerna Om Sommaren", "year": 2003, "url": "spotify:track:49OimCzeIacaDPsdKGlYKt"}, {"id": "6N6Ias6AghMTQOwP3G2TfQ", "artist": "Sarek", "title": "Genom Eld & Vatten", "year": 2003, "url": "spotify:track:6N6Ias6AghMTQOwP3G2TfQ"}, {"id": "2M8pRsbTsrNQ2O9h5wtpmV", "artist": "Ted Gärdestad", "title": "Oh, vilken härlig da'", "year": 2004, "url": "spotify:track:2M8pRsbTsrNQ2O9h5wtpmV"}, {"id": "0I7B4cDM2Rqh6uxn00BU7m", "artist": "Petter", "title": "Fredrik Snortare och Cecilia Synd", "year": 2004, "url": "spotify:track:0I7B4cDM2Rqh6uxn00BU7m"}, {"id": "45sdD9GjryujVOcRJ4YQRQ", "artist": "Teddybears;Mad Cobra", "title": "Cobrastyle (feat. Mad Cobra)", "year": 2004, "url": "spotify:track:45sdD9GjryujVOcRJ4YQRQ"}, {"id": "1ijNH4JCOlLJz7ToxmjUeY", "artist": "Christian Walz", "title": "Wonderchild", "year": 2004, "url": "spotify:track:1ijNH4JCOlLJz7ToxmjUeY"}, {"id": "68yU6f7Dx2KQrdkdU7bz2h", "artist": "Alcazar", "title": "Not a Sinner Nor a Saint", "year": 2004, "url": "spotify:track:68yU6f7Dx2KQrdkdU7bz2h"}, {"id": "6kTQYsUoab5bWtOh4wTITA", "artist": "Nic & The Family", "title": "Hej Monica", "year": 2004, "url": "spotify:track:6kTQYsUoab5bWtOh4wTITA"}, {"id": "1AfdWCYXaJHzHWsgGVkjhe", "artist": "Snook", "title": "Mister Cool", "year": 2004, "url": "spotify:track:1AfdWCYXaJHzHWsgGVkjhe"}, {"id": "6eVJVmtSb2hISLsEIuWY5N", "artist": "Alcazar", "title": "Crying at the Discoteque", "year": 2004, "url": "spotify:track:6eVJVmtSb2hISLsEIuWY5N"}, {"id": "1AETk3EwqrgVaMwlaLblfh", "artist": "Raymond & Maria", "title": "Ingen vill veta var du köpt din tröja", "year": 2004, "url": "spotify:track:1AETk3EwqrgVaMwlaLblfh"}, {"id": "5dpkOqj8pVFn3nS8OvMJNG", "artist": "Shirley Clamp", "title": "Min kärlek", "year": 2004, "url": "spotify:track:5dpkOqj8pVFn3nS8OvMJNG"}, {"id": "6739dAlhNEWU1xUtE3DOa1", "artist": "Peter Jöback", "title": "Sommarens sista sång - Radio Edit", "year": 2004, "url": "spotify:track:6739dAlhNEWU1xUtE3DOa1"}, {"id": "5OwH2YXbDrU5HOIyZDRFtg", "artist": "Peps Persson", "title": "Oh boy", "year": 2004, "url": "spotify:track:5OwH2YXbDrU5HOIyZDRFtg"}, {"id": "5wqRJkFnaSwfkMbP8cqvby", "artist": "Attack", "title": "Ooa Hela Natten", "year": 2004, "url": "spotify:track:5wqRJkFnaSwfkMbP8cqvby"}, {"id": "52vLuv7YSkhX27eMg4wv2L", "artist": "Nic & The Family", "title": "Hej Monica", "year": 2004, "url": "spotify:track:52vLuv7YSkhX27eMg4wv2L"}, {"id": "2y4xigAglMGjn9WW8eRA7b", "artist": "Magnus Uggla", "title": "Värsta grymma tjejen", "year": 2004, "url": "spotify:track:2y4xigAglMGjn9WW8eRA7b"}, {"id": "1ncViFeYXhivtuPumssvmZ", "artist": "Nanne", "title": "Håll om mig", "year": 2005, "url": "spotify:track:1ncViFeYXhivtuPumssvmZ"}, {"id": "3qChO81Z9r3KDyIj4w1m4T", "artist": "Björn Skifs", "title": "Michelangelo (Men så svara då!)", "year": 2005, "url": "spotify:track:3qChO81Z9r3KDyIj4w1m4T"}, {"id": "5BeBfnubllFy69omQHNavT", "artist": "Darin", "title": "Step Up", "year": 2005, "url": "spotify:track:5BeBfnubllFy69omQHNavT"}, {"id": "03N0ZpS5QaC9ga9i2xO9Vp", "artist": "September", "title": "Satellites", "year": 2005, "url": "spotify:track:03N0ZpS5QaC9ga9i2xO9Vp"}, {"id": "0qNhAdjq0R7iBGOM1X44I4", "artist": "Nordman", "title": "Ödet var min väg", "year": 2005, "url": "spotify:track:0qNhAdjq0R7iBGOM1X44I4"}, {"id": "6I1kZgg3bGrPKxhZOltbRW", "artist": "Timbuktu", "title": "Alla vill till himmelen men ingen vill dö", "year": 2005, "url": "spotify:track:6I1kZgg3bGrPKxhZOltbRW"}, {"id": "6LkCvCc9oFoLDv4DLhzTox", "artist": "Helena Paparizou", "title": "My Number One", "year": 2005, "url": "spotify:track:6LkCvCc9oFoLDv4DLhzTox"}, {"id": "76QiLh03h0vsutJSMBJUA1", "artist": "Agnes", "title": "Right Here Right Now (My Heart Belongs to You)", "year": 2005, "url": "spotify:track:76QiLh03h0vsutJSMBJUA1"}, {"id": "7jVkrMvBXc76uRJ0IsCoNk", "artist": "Tommy Nilsson", "title": "Amelia", "year": 2005, "url": "spotify:track:7jVkrMvBXc76uRJ0IsCoNk"}, {"id": "2YCWUpoVclk9PFo5cDfUPU", "artist": "Anna Book", "title": "ABC", "year": 2006, "url": "spotify:track:2YCWUpoVclk9PFo5cDfUPU"}, {"id": "5Cmwme624iKaqaSKTLcBWP", "artist": "Tommy Nilsson", "title": "En dag", "year": 2006, "url": "spotify:track:5Cmwme624iKaqaSKTLcBWP"}, {"id": "5J9AqZadtkq9pVzENnN3FJ", "artist": "Thomas Rusiak;Teddybears", "title": "Hiphopper", "year": 2006, "url": "spotify:track:5J9AqZadtkq9pVzENnN3FJ"}, {"id": "2MpXdpwJUPgN26SXVvQzVF", "artist": "Jonas Gardell", "title": "Aldrig ska jag sluta älska dig", "year": 2006, "url": "spotify:track:2MpXdpwJUPgN26SXVvQzVF"}, {"id": "00IRhIiynu3eZjVaegnJ2h", "artist": "Tommy Nilsson", "title": "Dina färger var blå", "year": 2006, "url": "spotify:track:00IRhIiynu3eZjVaegnJ2h"}, {"id": "5KaggKyCa9QZk25z93D4Zs", "artist": "Robyn", "title": "Show Me Love - Radio Version", "year": 2006, "url": "spotify:track:5KaggKyCa9QZk25z93D4Zs"}, {"id": "4IV8dOSLi26stONnuQg8Kf", "artist": "Linda Bengtzing", "title": "Jag ljuger så bra", "year": 2006, "url": "spotify:track:4IV8dOSLi26stONnuQg8Kf"}, {"id": "5cPZasAXPI8Bdjio8vrYSk", "artist": "Freda'", "title": "I en annan del av världen", "year": 2006, "url": "spotify:track:5cPZasAXPI8Bdjio8vrYSk"}, {"id": "1xaceA6UFLm0vOTiChuCEY", "artist": "Freda'", "title": "Allt man kan önska sig", "year": 2006, "url": "spotify:track:1xaceA6UFLm0vOTiChuCEY"}, {"id": "2VY6Ugb5GUgWfUTpEEx85J", "artist": "Barbados", "title": "Kom hem", "year": 2006, "url": "spotify:track:2VY6Ugb5GUgWfUTpEEx85J"}, {"id": "2OVQRlkVtYKLr9YBQmWaKx", "artist": "Freda'", "title": "Vindarna", "year": 2006, "url": "spotify:track:2OVQRlkVtYKLr9YBQmWaKx"}, {"id": "2MXLCtlKc8eyJlAf3PbyLN", "artist": "Just D", "title": "Tre gringos", "year": 2006, "url": "spotify:track:2MXLCtlKc8eyJlAf3PbyLN"}, {"id": "6ecLksUk4lmy1WVw5i6yBZ", "artist": "Robyn", "title": "Do You Really Want Me (show respect)", "year": 2006, "url": "spotify:track:6ecLksUk4lmy1WVw5i6yBZ"}, {"id": "6YGqMb6MmqcwIHaDSCA7Nq", "artist": "Linda Bengtzing", "title": "Alla flickor", "year": 2006, "url": "spotify:track:6YGqMb6MmqcwIHaDSCA7Nq"}, {"id": "3njweosKzGwLCGi7Mnwo8s", "artist": "Martin Stenmarck", "title": "Sjumilakliv", "year": 2006, "url": "spotify:track:3njweosKzGwLCGi7Mnwo8s"}, {"id": "5v55pDsyrxIs6OTk3E5l69", "artist": "Fronda;ChrisLejon", "title": "Rullar fram", "year": 2007, "url": "spotify:track:5v55pDsyrxIs6OTk3E5l69"}, {"id": "5YuLlTsWYK9uslUdGM83dJ", "artist": "Markoolio", "title": "Ingen sommar utan reggae", "year": 2007, "url": "spotify:track:5YuLlTsWYK9uslUdGM83dJ"}, {"id": "2aeVGqdsF7WbKZkwhcCeqm", "artist": "Lena Philipsson", "title": "Det gör ont", "year": 2007, "url": "spotify:track:2aeVGqdsF7WbKZkwhcCeqm"}, {"id": "05B2RicVswcCU2To7wPVtw", "artist": "Markoolio;Linda Bengtzing", "title": "Värsta schlagern - Radio Version", "year": 2007, "url": "spotify:track:05B2RicVswcCU2To7wPVtw"}, {"id": "4N0NK4lCncys6hwWhtXRit", "artist": "Lena Philipsson", "title": "Dansa i neon", "year": 2007, "url": "spotify:track:4N0NK4lCncys6hwWhtXRit"}, {"id": "7IOlbck6GABZ4LKKt33qgp", "artist": "Antique", "title": "Opa Opa", "year": 2007, "url": "spotify:track:7IOlbck6GABZ4LKKt33qgp"}, {"id": "0A7kKs6eny0KnBXdzGt35u", "artist": "Lena Philipsson", "title": "Han jobbar i affär", "year": 2007, "url": "spotify:track:0A7kKs6eny0KnBXdzGt35u"}, {"id": "1mvZErZBp7WZT3HfGBykao", "artist": "September", "title": "Cry for You", "year": 2007, "url": "spotify:track:1mvZErZBp7WZT3HfGBykao"}, {"id": "4FQ4m9whOZuTc205hI8WDa", "artist": "Lena Philipsson", "title": "Delirium", "year": 2007, "url": "spotify:track:4FQ4m9whOZuTc205hI8WDa"}, {"id": "2ataTDIyktOJSnxeMlBggw", "artist": "Mange Schmidt", "title": "Giftig", "year": 2007, "url": "spotify:track:2ataTDIyktOJSnxeMlBggw"}, {"id": "17q9gSD214wClyCjqrhmgH", "artist": "Lars Winnerbäck;Miss Li", "title": "Om du lämnade mig nu", "year": 2007, "url": "spotify:track:17q9gSD214wClyCjqrhmgH"}, {"id": "66Bzmhj4cOinK5bxjx5DAK", "artist": "Oh Laura", "title": "Release Me", "year": 2007, "url": "spotify:track:66Bzmhj4cOinK5bxjx5DAK"}, {"id": "3ohXW41Z5iU6pL4pfpAMO0", "artist": "Imperiet", "title": "Du ska va president", "year": 2007, "url": "spotify:track:3ohXW41Z5iU6pL4pfpAMO0"}, {"id": "1aGNEZc7EA6MiCW1s9GyUD", "artist": "Lena Philipsson", "title": "Kärleken är evig", "year": 2007, "url": "spotify:track:1aGNEZc7EA6MiCW1s9GyUD"}, {"id": "103EuC2phtyVhUxmZRUfCN", "artist": "Säkert!", "title": "Någon gång måste du bli själv", "year": 2007, "url": "spotify:track:103EuC2phtyVhUxmZRUfCN"}, {"id": "4zE8bNADIyZyotZuHaXdsC", "artist": "Staffan Hellstrand", "title": "Lilla fågel blå", "year": 2007, "url": "spotify:track:4zE8bNADIyZyotZuHaXdsC"}, {"id": "46LJxnfgq4QspkXlJGkiO1", "artist": "Weeping Willows", "title": "The Burden", "year": 2007, "url": "spotify:track:46LJxnfgq4QspkXlJGkiO1"}, {"id": "1sQxrKrojCSuBk6XuaT8vm", "artist": "Säkert!", "title": "Vi kommer att dö samtidigt", "year": 2007, "url": "spotify:track:1sQxrKrojCSuBk6XuaT8vm"}, {"id": "1wBvEF9XMTqclPzkdmNefn", "artist": "Stefan Andersson", "title": "Catch the Moon", "year": 2007, "url": "spotify:track:1wBvEF9XMTqclPzkdmNefn"}, {"id": "0C2jB4s716KdeTL3RkLT7x", "artist": "Kobojsarna", "title": "Jag vet du vill ha mig", "year": 2007, "url": "spotify:track:0C2jB4s716KdeTL3RkLT7x"}, {"id": "5LJLOryGTb77Uug88vAgHK", "artist": "Björn Rosenström", "title": "Het", "year": 2007, "url": "spotify:track:5LJLOryGTb77Uug88vAgHK"}, {"id": "5FwOEX08UX0o7B6ekJP0TZ", "artist": "Björn Rosenström", "title": "En gång är ingen gång", "year": 2007, "url": "spotify:track:5FwOEX08UX0o7B6ekJP0TZ"}, {"id": "4yAcdHEdXi0FKTlUrl2h8c", "artist": "Kobojsarna", "title": "Sång om ingenting - Radio Edit", "year": 2007, "url": "spotify:track:4yAcdHEdXi0FKTlUrl2h8c"}, {"id": "1d5j7ibUKDihkXKddtp1dl", "artist": "Magnus Uggla", "title": "Trubaduren", "year": 2008, "url": "spotify:track:1d5j7ibUKDihkXKddtp1dl"}, {"id": "7MzmBmyI9KkyQJaPNLdtUi", "artist": "Veronica Maggio", "title": "17 år", "year": 2008, "url": "spotify:track:7MzmBmyI9KkyQJaPNLdtUi"}, {"id": "3KKaGvEv3xkQpRAUMX4e0l", "artist": "Lotta Engberg", "title": "Fyra Bugg & en Coca-Cola", "year": 2008, "url": "spotify:track:3KKaGvEv3xkQpRAUMX4e0l"}, {"id": "51cOCcB9c8tjUI50trrD4r", "artist": "Nick Borgen", "title": "We Are All The Winners", "year": 2008, "url": "spotify:track:51cOCcB9c8tjUI50trrD4r"}, {"id": "3bySE7K5HW7QJKJiE5GlGU", "artist": "BlackJack", "title": "Inget stoppar oss nu", "year": 2008, "url": "spotify:track:3bySE7K5HW7QJKJiE5GlGU"}, {"id": "1wdRo9hSIYSsQDwLd40a1W", "artist": "Magnus Uggla", "title": "Jag mår illa", "year": 2008, "url": "spotify:track:1wdRo9hSIYSsQDwLd40a1W"}, {"id": "2h8uwSS8sOw1WTTi2HALpN", "artist": "Magnus Uggla", "title": "4 sekunder", "year": 2008, "url": "spotify:track:2h8uwSS8sOw1WTTi2HALpN"}, {"id": "0IxuXyxYOVlrnNXwnaNiFb", "artist": "Wizex (Charlotte Nilsson)", "title": "Tusen och en natt", "year": 2008, "url": "spotify:track:0IxuXyxYOVlrnNXwnaNiFb"}, {"id": "4Vg4aicJ6wzbhdpDh1Nq8L", "artist": "E.M.D.", "title": "Baby Goodbye", "year": 2008, "url": "spotify:track:4Vg4aicJ6wzbhdpDh1Nq8L"}, {"id": "47GwDJeaMuy6qISfD1gzWr", "artist": "E.M.D.", "title": "Jennie Let Me Love You - Radio Edit", "year": 2008, "url": "spotify:track:47GwDJeaMuy6qISfD1gzWr"}, {"id": "2T6eHFvCm6sFxiQeGYJL4C", "artist": "Patrik Isaksson", "title": "Du får göra som du vill", "year": 2008, "url": "spotify:track:2T6eHFvCm6sFxiQeGYJL4C"}, {"id": "3N9huFk2IceMSlKoZLaUsv", "artist": "Basshunter", "title": "Boten Anna - Radio edit", "year": 2008, "url": "spotify:track:3N9huFk2IceMSlKoZLaUsv"}, {"id": "1GmwF2m6zfChfOLHOHsMmQ", "artist": "Magnus Uggla", "title": "Efterfest", "year": 2008, "url": "spotify:track:1GmwF2m6zfChfOLHOHsMmQ"}, {"id": "5238doM6GbkyM9lNPeIwrQ", "artist": "Carola", "title": "Mitt i ett äventyr", "year": 2008, "url": "spotify:track:5238doM6GbkyM9lNPeIwrQ"}, {"id": "0vBwerXK42Xjl0vf4rHqFa", "artist": "Danny Saucedo;Therese", "title": "If Only You (feat. Therese)", "year": 2008, "url": "spotify:track:0vBwerXK42Xjl0vf4rHqFa"}, {"id": "0SMs1eUeMnSlMhr3ZZXJgC", "artist": "Magnus Uggla", "title": "Fula gubbar", "year": 2008, "url": "spotify:track:0SMs1eUeMnSlMhr3ZZXJgC"}, {"id": "4gZZ1l0jMXvQ8mxqwKHP7t", "artist": "Sten & Stanley", "title": "Jag vill vara din, Margareta", "year": 2008, "url": "spotify:track:4gZZ1l0jMXvQ8mxqwKHP7t"}, {"id": "35SeblfhFeLLZUnitcYdgu", "artist": "Magnus Uggla", "title": "Nitar och läder", "year": 2008, "url": "spotify:track:35SeblfhFeLLZUnitcYdgu"}, {"id": "6jQtUzaNIfjloo9bX5lxs8", "artist": "Magnus Uggla", "title": "Johnny the Rocker", "year": 2008, "url": "spotify:track:6jQtUzaNIfjloo9bX5lxs8"}, {"id": "4nXeZFbbcZNvX4nHMJR5xJ", "artist": "Markus Krunegård", "title": "Jag är en vampyr", "year": 2008, "url": "spotify:track:4nXeZFbbcZNvX4nHMJR5xJ"}, {"id": "7INhO4ADgVyGVr3ivV4I1D", "artist": "Melissa Horn", "title": "Som jag hade dig förut", "year": 2008, "url": "spotify:track:7INhO4ADgVyGVr3ivV4I1D"}, {"id": "7qmb9QR1EOt2i0PmXXmYFl", "artist": "Magnus Uggla", "title": "Astrologen", "year": 2008, "url": "spotify:track:7qmb9QR1EOt2i0PmXXmYFl"}, {"id": "0GiN5bEBn1jZH5npIzrKYh", "artist": "Magnus Uggla", "title": "Baby Boom", "year": 2008, "url": "spotify:track:0GiN5bEBn1jZH5npIzrKYh"}, {"id": "55XpXSN77QyoudQmlg8j8q", "artist": "Charlotte Perrelli", "title": "Hero", "year": 2008, "url": "spotify:track:55XpXSN77QyoudQmlg8j8q"}, {"id": "7nOXCd2V6vdBgrP7PlD91D", "artist": "Danny Saucedo", "title": "Tokyo - Radio Version", "year": 2008, "url": "spotify:track:7nOXCd2V6vdBgrP7PlD91D"}, {"id": "58GT40XJGSS1ScUygvyPAt", "artist": "Magnus Uggla", "title": "Varning på stan", "year": 2008, "url": "spotify:track:58GT40XJGSS1ScUygvyPAt"}, {"id": "4j19cF6ZE0LELLnO6JVoIf", "artist": "Magnus Uggla", "title": "IQ", "year": 2008, "url": "spotify:track:4j19cF6ZE0LELLnO6JVoIf"}, {"id": "7B5NnCY27qsWb1neu5MhXa", "artist": "Magnus Uggla", "title": "Joey Killer", "year": 2008, "url": "spotify:track:7B5NnCY27qsWb1neu5MhXa"}, {"id": "2Vp9Ox6vewOZBdCL97gitE", "artist": "Melissa Horn", "title": "Långa nätter", "year": 2008, "url": "spotify:track:2Vp9Ox6vewOZBdCL97gitE"}, {"id": "2zUsiqLZUwwMMEiIqaZag7", "artist": "Lifvens", "title": "Mjölkbilen", "year": 2008, "url": "spotify:track:2zUsiqLZUwwMMEiIqaZag7"}, {"id": "5hVDznakebbR2mdmcbqoCI", "artist": "Erik Grönwall", "title": "Higher", "year": 2009, "url": "spotify:track:5hVDznakebbR2mdmcbqoCI"}, {"id": "769SjtHPstx3yw6QmvP232", "artist": "Lorentz & Sakarias", "title": "Mayhem", "year": 2009, "url": "spotify:track:769SjtHPstx3yw6QmvP232"}, {"id": "56IK5XbzZ8H3m3DtExNku5", "artist": "Lasse Berghagen", "title": "En kväll i juni", "year": 2009, "url": "spotify:track:56IK5XbzZ8H3m3DtExNku5"}, {"id": "0WU15SAYHClmfKPR2GtVPZ", "artist": "Bengt Pegefelt", "title": "Köppäbävisan", "year": 2009, "url": "spotify:track:0WU15SAYHClmfKPR2GtVPZ"}, {"id": "6iqEd2PFZanx8qcynhfE9d", "artist": "Maskinen", "title": "Segertåget", "year": 2009, "url": "spotify:track:6iqEd2PFZanx8qcynhfE9d"}, {"id": "2JjwnqblNik241Uzuusdck", "artist": "Maskinen", "title": "Alla som inte dansar", "year": 2009, "url": "spotify:track:2JjwnqblNik241Uzuusdck"}, {"id": "5VkQnKKveR6C7MngcsoZ6P", "artist": "Petter;Veronica Maggio", "title": "Längesen (feat. Veronica Maggio)", "year": 2010, "url": "spotify:track:5VkQnKKveR6C7MngcsoZ6P"}, {"id": "5Tbc2O2q1NCux8F0lYiEo0", "artist": "Kalle Moraeus;Orsa Spelmän", "title": "Underbart", "year": 2010, "url": "spotify:track:5Tbc2O2q1NCux8F0lYiEo0"}, {"id": "08bjJuoHJwfTnjNcuENOFz", "artist": "Daniel Adams-Ray", "title": "Gubben i lådan", "year": 2010, "url": "spotify:track:08bjJuoHJwfTnjNcuENOFz"}, {"id": "3KGzq4GPOHqYV8IZxRqyZW", "artist": "Peter Jöback", "title": "Guldet blev till sand", "year": 2010, "url": "spotify:track:3KGzq4GPOHqYV8IZxRqyZW"}, {"id": "379S6VBwFo9FUrK5rz33mq", "artist": "Oskar Linnros", "title": "Från och med Du", "year": 2010, "url": "spotify:track:379S6VBwFo9FUrK5rz33mq"}, {"id": "3BjZeG0JSBklJQ7D5heG2O", "artist": "Petter;Säkert!", "title": "Logiskt (feat. Säkert!)", "year": 2010, "url": "spotify:track:3BjZeG0JSBklJQ7D5heG2O"}, {"id": "06bayPghnjAqFzwbVsZwz8", "artist": "Docent Död", "title": "Solglasögon", "year": 2010, "url": "spotify:track:06bayPghnjAqFzwbVsZwz8"}, {"id": "1rk6RXgRKdVLfhbJQxUwhA", "artist": "Suzzies Orkester", "title": "Dansar i månens sken", "year": 2010, "url": "spotify:track:1rk6RXgRKdVLfhbJQxUwhA"}, {"id": "7G4jxL5jCy4EuzMPqkgrE0", "artist": "Fronda", "title": "Underbar", "year": 2010, "url": "spotify:track:7G4jxL5jCy4EuzMPqkgrE0"}, {"id": "6sjGsKuInpaK3uoaWGe22W", "artist": "Oskar Linnros", "title": "Från och med Du", "year": 2010, "url": "spotify:track:6sjGsKuInpaK3uoaWGe22W"}, {"id": "2cXJMVMCA5e4tiqnj1IjIR", "artist": "Mellony", "title": "Syn På Sex - Non Radio Edit", "year": 2010, "url": "spotify:track:2cXJMVMCA5e4tiqnj1IjIR"}, {"id": "0xjVgqTMOdT2dxPuXgSORm", "artist": "September", "title": "Mikrofonkåt", "year": 2011, "url": "spotify:track:0xjVgqTMOdT2dxPuXgSORm"}, {"id": "3uVO0fpvKhuPCfGCAjJev0", "artist": "Kapten Röd", "title": "Ju Mer Dom Spottar", "year": 2011, "url": "spotify:track:3uVO0fpvKhuPCfGCAjJev0"}, {"id": "5M2y8QdDepGYMsWyxhoxQU", "artist": "Veronica Maggio", "title": "Jag kommer", "year": 2011, "url": "spotify:track:5M2y8QdDepGYMsWyxhoxQU"}, {"id": "5MEuFY2DxrozPEgGpR8Fji", "artist": "Veronica Maggio", "title": "Välkommen in", "year": 2011, "url": "spotify:track:5MEuFY2DxrozPEgGpR8Fji"}, {"id": "6piWnVkzaYenWppYl1Rgsz", "artist": "Petter;Veronica Maggio", "title": "Längesen (feat. Veronica Maggio) - Kyaal Remix", "year": 2011, "url": "spotify:track:6piWnVkzaYenWppYl1Rgsz"}, {"id": "3wkE1y8yv65YFY9HZV8u2j", "artist": "Ison & Fille;ISON;Fille Danza;Hoosam;Sabo;Aleks", "title": "Från hjärtat (feat. Hoosam, Sabo & Aleks)", "year": 2011, "url": "spotify:track:3wkE1y8yv65YFY9HZV8u2j"}, {"id": "1jYu0gTLkWcQzP9UL9Shuv", "artist": "Eric Amarillo", "title": "Om sanningen ska fram (Vill du ligga med mig?)", "year": 2011, "url": "spotify:track:1jYu0gTLkWcQzP9UL9Shuv"}, {"id": "0atRkLynwT9JbhSQkoPdLY", "artist": "Melissa Horn", "title": "Jag saknar dig mindre och mindre", "year": 2011, "url": "spotify:track:0atRkLynwT9JbhSQkoPdLY"}, {"id": "37kSYO0ly14YHLZATjR2v7", "artist": "Drängarna", "title": "Bärsärkagång", "year": 2011, "url": "spotify:track:37kSYO0ly14YHLZATjR2v7"}, {"id": "2jEPQKvz7dh1pfpRyq6G1C", "artist": "Veronica Maggio", "title": "Snälla bli min", "year": 2011, "url": "spotify:track:2jEPQKvz7dh1pfpRyq6G1C"}, {"id": "3ng7C6llxYZDBefPfbaDUt", "artist": "Mikael Rickfors", "title": "Vingar", "year": 2011, "url": "spotify:track:3ng7C6llxYZDBefPfbaDUt"}, {"id": "35r2D3oTBkr33rLYWvfGwJ", "artist": "Stefan Andersson", "title": "113 officerare", "year": 2011, "url": "spotify:track:35r2D3oTBkr33rLYWvfGwJ"}, {"id": "508HOiphnDt26e8ylIQlwP", "artist": "Newkid", "title": "Jag gråter bara i regnet - Akustisk version", "year": 2011, "url": "spotify:track:508HOiphnDt26e8ylIQlwP"}, {"id": "7i7zRj8jD5y2AGH4AJsdpB", "artist": "Kapten Röd", "title": "Ju Mer Dom Spottar", "year": 2011, "url": "spotify:track:7i7zRj8jD5y2AGH4AJsdpB"}, {"id": "32LXe5COBCJfDJFiMwbs0b", "artist": "Eric Amarillo", "title": "Om sanningen ska fram (Vill du ligga med mig?) - Clubedit Radio", "year": 2011, "url": "spotify:track:32LXe5COBCJfDJFiMwbs0b"}, {"id": "1m0f7jTxaqHTkXH9qIigox", "artist": "Mange Makers", "title": "Mange bjuder", "year": 2011, "url": "spotify:track:1m0f7jTxaqHTkXH9qIigox"}, {"id": "3q8WojYJVZsGClFGFBYdTc", "artist": "Veronica Maggio", "title": "Satan i gatan", "year": 2011, "url": "spotify:track:3q8WojYJVZsGClFGFBYdTc"}, {"id": "4oEozZqTuhEXIYmpgaiKMC", "artist": "September", "title": "Mikrofonkåt", "year": 2011, "url": "spotify:track:4oEozZqTuhEXIYmpgaiKMC"}, {"id": "3hNpnx2AXhIVBhNOoiBUmI", "artist": "Timbuktu", "title": "Resten av ditt liv", "year": 2011, "url": "spotify:track:3hNpnx2AXhIVBhNOoiBUmI"}, {"id": "7nLMZKhfkFZLr9rz4VyOpF", "artist": "Den svenska björnstammen", "title": "Vart jag mig i världen vänder", "year": 2012, "url": "spotify:track:7nLMZKhfkFZLr9rz4VyOpF"}, {"id": "14AJI1RloVWTh8bJe9gBPM", "artist": "Petra Marklund", "title": "Händerna mot himlen", "year": 2012, "url": "spotify:track:14AJI1RloVWTh8bJe9gBPM"}, {"id": "61o5tmzK4TdftIGykP7stT", "artist": "Linnea Henriksson", "title": "Lyckligare nu", "year": 2012, "url": "spotify:track:61o5tmzK4TdftIGykP7stT"}, {"id": "5J2UfqBylH8jDQZJnxby81", "artist": "Sean Banan", "title": "Sean den förste Banan", "year": 2012, "url": "spotify:track:5J2UfqBylH8jDQZJnxby81"}, {"id": "33qw98yPnShEQMoF72ORUa", "artist": "Danny Saucedo", "title": "Amazing", "year": 2012, "url": "spotify:track:33qw98yPnShEQMoF72ORUa"}, {"id": "5gzslnn0fGkJnMz2IbyMw7", "artist": "Mando Diao", "title": "Strövtåg i hembygden", "year": 2012, "url": "spotify:track:5gzslnn0fGkJnMz2IbyMw7"}, {"id": "4zDdZaKglOiw76QxbvWU2S", "artist": "Den svenska björnstammen", "title": "Svalkar vinden", "year": 2012, "url": "spotify:track:4zDdZaKglOiw76QxbvWU2S"}, {"id": "6REMRPdAd7TFDujIWVdx4Q", "artist": "Markoolio", "title": "In med bollen 2012", "year": 2012, "url": "spotify:track:6REMRPdAd7TFDujIWVdx4Q"}, {"id": "4T8R2tlnxltuIHHzhFOY8T", "artist": "Linnea Henriksson", "title": "Väldigt kär/Obegripligt ensam", "year": 2012, "url": "spotify:track:4T8R2tlnxltuIHHzhFOY8T"}, {"id": "5oaKMbpHlfk6oaPtbaqJPc", "artist": "Lilla Sällskapet", "title": "Jag vill ut", "year": 2012, "url": "spotify:track:5oaKMbpHlfk6oaPtbaqJPc"}, {"id": "6ynA8C44LCujXkIi1SY9c0", "artist": "Orup", "title": "Vackert Väder", "year": 2012, "url": "spotify:track:6ynA8C44LCujXkIi1SY9c0"}, {"id": "0jfvayR4o86rv0UwQ1g3fX", "artist": "Alina Devecerski", "title": "Flytta på dej", "year": 2012, "url": "spotify:track:0jfvayR4o86rv0UwQ1g3fX"}, {"id": "68GdZAAowWDac3SkdNWOwo", "artist": "AKI;Kapten Röd", "title": "När solen går ner", "year": 2012, "url": "spotify:track:68GdZAAowWDac3SkdNWOwo"}, {"id": "4RU3y1BkMuNyLfZNvQvinw", "artist": "Casanovas", "title": "Dra dit pepparn växer", "year": 2012, "url": "spotify:track:4RU3y1BkMuNyLfZNvQvinw"}, {"id": "1hPjWosOfGkz6o8IQbYEcq", "artist": "Lorentz & Sakarias;Duvchi", "title": "Garbo, Astrid & Taube (feat. Duvchi)", "year": 2012, "url": "spotify:track:1hPjWosOfGkz6o8IQbYEcq"}, {"id": "2gNAGt7gUiMkagkhIiDLPm", "artist": "Panetoz", "title": "Dansa Pausa", "year": 2012, "url": "spotify:track:2gNAGt7gUiMkagkhIiDLPm"}, {"id": "4gBWeVgSetIJQcGohFNLeE", "artist": "Maskinen", "title": "Krossa alla fönster", "year": 2012, "url": "spotify:track:4gBWeVgSetIJQcGohFNLeE"}, {"id": "5hsZ6loP0rseyjleWs0cZ1", "artist": "Medina", "title": "Där palmerna bor", "year": 2012, "url": "spotify:track:5hsZ6loP0rseyjleWs0cZ1"}, {"id": "5hDowhxXBk5POQppBYONeO", "artist": "Stiftelsen", "title": "Vart jag än går", "year": 2012, "url": "spotify:track:5hDowhxXBk5POQppBYONeO"}, {"id": "7HvsmVwO3LToYj8kfbRfla", "artist": "Mange Makers", "title": "Drick den - Radio Edit", "year": 2012, "url": "spotify:track:7HvsmVwO3LToYj8kfbRfla"}, {"id": "2FLXBecalzKwJsb9AY9EjD", "artist": "Darin", "title": "En apa som liknar dig", "year": 2012, "url": "spotify:track:2FLXBecalzKwJsb9AY9EjD"}, {"id": "7KOegFQMd13ETQry4A6Tu1", "artist": "Mando Diao", "title": "Strövtåg i hembygden", "year": 2012, "url": "spotify:track:7KOegFQMd13ETQry4A6Tu1"}, {"id": "1UKtiT6LpuzDd29zAkztXU", "artist": "Ansiktet", "title": "Äckligt", "year": 2013, "url": "spotify:track:1UKtiT6LpuzDd29zAkztXU"}, {"id": "3SjXx3rbNGk8nCho8YEoz5", "artist": "Håkan Hellström", "title": "Det kommer aldrig va över för mig", "year": 2013, "url": "spotify:track:3SjXx3rbNGk8nCho8YEoz5"}, {"id": "1EqYoza9iMnxB9O0TwAeOO", "artist": "Albatraoz", "title": "Albatraoz", "year": 2013, "url": "spotify:track:1EqYoza9iMnxB9O0TwAeOO"}, {"id": "4GmfoKVBh1mIR6OVaMDXRK", "artist": "Magnus Uggla", "title": "Jag och min far", "year": 2013, "url": "spotify:track:4GmfoKVBh1mIR6OVaMDXRK"}, {"id": "792VMoWC2A4GIRHooEawqR", "artist": "Sean Banan", "title": "Copacabanana", "year": 2013, "url": "spotify:track:792VMoWC2A4GIRHooEawqR"}, {"id": "0Hz0ySp6XYrBhEQPU16Hz8", "artist": "Håkan Hellström", "title": "Valborg", "year": 2013, "url": "spotify:track:0Hz0ySp6XYrBhEQPU16Hz8"}, {"id": "2ElW5oqfJ0OwlJAWFw9BlJ", "artist": "Eldkvarn", "title": "Kärlekens tunga - 2000 Remastered Version", "year": 2013, "url": "spotify:track:2ElW5oqfJ0OwlJAWFw9BlJ"}, {"id": "4J0WQvqCBytACvgKVrq1S3", "artist": "Petter;Daniel Adams-Ray", "title": "Håll om mig", "year": 2013, "url": "spotify:track:4J0WQvqCBytACvgKVrq1S3"}, {"id": "5b3wMWarS38eAkeMjnhzFx", "artist": "Viktoria Tolstoy;Jakob Samuel", "title": "Som stormen river öppet hav", "year": 2013, "url": "spotify:track:5b3wMWarS38eAkeMjnhzFx"}, {"id": "1DLgyG3oqFB1pZacMOsdLB", "artist": "Medina", "title": "Miss Decibel", "year": 2013, "url": "spotify:track:1DLgyG3oqFB1pZacMOsdLB"}, {"id": "4vsI4DscX7T5alizDakNS8", "artist": "Ansiktet", "title": "Äckligt", "year": 2013, "url": "spotify:track:4vsI4DscX7T5alizDakNS8"}, {"id": "0MYpplGQfDR5YNFNWZE4aR", "artist": "Tjuvjakt", "title": "Fru Gårman", "year": 2013, "url": "spotify:track:0MYpplGQfDR5YNFNWZE4aR"}, {"id": "0ix0QiT745Gyqo06J75hWs", "artist": "Norlie & KKV", "title": "Där jag hänger min hatt", "year": 2013, "url": "spotify:track:0ix0QiT745Gyqo06J75hWs"}, {"id": "6kNmqIK4l1e9zcIUiStL7e", "artist": "Niello", "title": "Legenden (feat. Phantomen) - Single Version", "year": 2013, "url": "spotify:track:6kNmqIK4l1e9zcIUiStL7e"}, {"id": "2PZlzmjxlKAmf1b29jVw2g", "artist": "Tjuvjakt;Penga' Per", "title": "Saccosäck", "year": 2013, "url": "spotify:track:2PZlzmjxlKAmf1b29jVw2g"}, {"id": "5BkwRIaNsmaLDHwdflIxyu", "artist": "Norlie & KKV", "title": "Tröjan du hatar", "year": 2013, "url": "spotify:track:5BkwRIaNsmaLDHwdflIxyu"}, {"id": "1K2a8QcaPTDTZ1e4M0s8gQ", "artist": "Tjuvjakt", "title": "Tandtråd", "year": 2013, "url": "spotify:track:1K2a8QcaPTDTZ1e4M0s8gQ"}, {"id": "0yNrN7dS3HqMNjMgvchNzS", "artist": "Medina", "title": "Sista minuten", "year": 2013, "url": "spotify:track:0yNrN7dS3HqMNjMgvchNzS"}, {"id": "4mFokUQEGYUeEUY5npO3dJ", "artist": "Mange Makers", "title": "Inte en krona", "year": 2013, "url": "spotify:track:4mFokUQEGYUeEUY5npO3dJ"}, {"id": "7EbbpPz5TuG9eVZDDbKs1e", "artist": "Kartellen;Timbuktu", "title": "Svarta duvor & vissna liljor", "year": 2013, "url": "spotify:track:7EbbpPz5TuG9eVZDDbKs1e"}, {"id": "4phXGvBcnpE06lN3Kf63a0", "artist": "Stiftelsen", "title": "En annan värld", "year": 2013, "url": "spotify:track:4phXGvBcnpE06lN3Kf63a0"}, {"id": "6PYyvJaBgX9hXb2ATfgn8R", "artist": "Kartellen;Aleks", "title": "Underklassmusik - Radio Edit", "year": 2013, "url": "spotify:track:6PYyvJaBgX9hXb2ATfgn8R"}, {"id": "71CFZjdSm2WSh5S6TPd69A", "artist": "Veronica Maggio;Håkan Hellström", "title": "Hela huset", "year": 2013, "url": "spotify:track:71CFZjdSm2WSh5S6TPd69A"}, {"id": "3slbaNTgLukV60iYBuUmBU", "artist": "Nationen", "title": "Falska Människor", "year": 2013, "url": "spotify:track:3slbaNTgLukV60iYBuUmBU"}, {"id": "3Nffm3OM123ldn35sG6fBp", "artist": "Magnus Uggla", "title": "Jag och min far", "year": 2013, "url": "spotify:track:3Nffm3OM123ldn35sG6fBp"}, {"id": "58facAQuyUDml53CS4fOd3", "artist": "Thomas Stenström", "title": "Slå mig hårt i ansiktet", "year": 2014, "url": "spotify:track:58facAQuyUDml53CS4fOd3"}, {"id": "5MhsZlmKJG6X5kTHkdwC4B", "artist": "AronChupa;Little Sis Nora", "title": "I'm an Albatraoz", "year": 2014, "url": "spotify:track:5MhsZlmKJG6X5kTHkdwC4B"}, {"id": "2qkma39oRZ0rzGkyE2gdHd", "artist": "Bo Kaspers Orkester", "title": "I samma bil", "year": 2014, "url": "spotify:track:2qkma39oRZ0rzGkyE2gdHd"}, {"id": "0jQvysmjtBMRNjmHLe3gZK", "artist": "Kim Cesarion", "title": "Undressed", "year": 2014, "url": "spotify:track:0jQvysmjtBMRNjmHLe3gZK"}, {"id": "2czY6FVL0Euu6pwMy2t4DU", "artist": "Rednex", "title": "Cotton Eye Joe", "year": 2014, "url": "spotify:track:2czY6FVL0Euu6pwMy2t4DU"}, {"id": "46JdPZmwWfkCJHVzd5gi8v", "artist": "Lorentz;Jaqe;Duvchi;JJ;JOY", "title": "Där dit vinden kommer (feat. Jaqe, Duvchi, jj & Joy)", "year": 2014, "url": "spotify:track:46JdPZmwWfkCJHVzd5gi8v"}, {"id": "0pM1qXcUs9lzLpDeR62HSo", "artist": "Ison & Fille", "title": "Länge leve vi", "year": 2014, "url": "spotify:track:0pM1qXcUs9lzLpDeR62HSo"}, {"id": "1UmPfQAPqLnjSuRtcLJeoF", "artist": "Linnea Henriksson", "title": "Halmstad", "year": 2014, "url": "spotify:track:1UmPfQAPqLnjSuRtcLJeoF"}, {"id": "50atWaR6Omiu5TuVj4xwGr", "artist": "Bo Kaspers Orkester", "title": "Semester", "year": 2014, "url": "spotify:track:50atWaR6Omiu5TuVj4xwGr"}, {"id": "4hbijkxB7YcmzjMBUGGR09", "artist": "Bo Kaspers Orkester", "title": "Vi kommer aldrig att dö - 2009 Version", "year": 2014, "url": "spotify:track:4hbijkxB7YcmzjMBUGGR09"}, {"id": "7vBbOnz4rbHJsxTtm53x3r", "artist": "Linnea Henriksson", "title": "Du söker bråk, jag kräver dans", "year": 2014, "url": "spotify:track:7vBbOnz4rbHJsxTtm53x3r"}, {"id": "20x69WUfZFd548xjUSTIP5", "artist": "Bo Kaspers Orkester", "title": "Undantag", "year": 2014, "url": "spotify:track:20x69WUfZFd548xjUSTIP5"}, {"id": "4mzhYHX8ifzzKzaDHT5UOl", "artist": "Bo Kaspers Orkester", "title": "Hon är så söt", "year": 2014, "url": "spotify:track:4mzhYHX8ifzzKzaDHT5UOl"}, {"id": "2Lv9FudgITbthtKK1B5wxY", "artist": "Thomas Stenström", "title": "Slå mig hårt i ansiktet", "year": 2014, "url": "spotify:track:2Lv9FudgITbthtKK1B5wxY"}, {"id": "4wxu7C1jlABLTytdjf7Zaj", "artist": "De Vet Du", "title": "Klä Av Dig Naken", "year": 2014, "url": "spotify:track:4wxu7C1jlABLTytdjf7Zaj"}, {"id": "2dh07zmyCMoY64rQdJrXLe", "artist": "Panetoz", "title": "Efter solsken", "year": 2014, "url": "spotify:track:2dh07zmyCMoY64rQdJrXLe"}, {"id": "4XhRcVuutgfKg5pvEotoTB", "artist": "Michael Nyberg", "title": "Min Sista Snus", "year": 2014, "url": "spotify:track:4XhRcVuutgfKg5pvEotoTB"}, {"id": "0aBbPzPQX5XMN6lCpyOCrH", "artist": "De Vet Du", "title": "Fucka Ur", "year": 2014, "url": "spotify:track:0aBbPzPQX5XMN6lCpyOCrH"}, {"id": "4pItP9yMHJ4Klk8U6eOmLx", "artist": "Jakob Karlberg", "title": "Fan va bra", "year": 2015, "url": "spotify:track:4pItP9yMHJ4Klk8U6eOmLx"}, {"id": "3YAs2Cz1DeYEUPn5G1p9IM", "artist": "Grillat & Grändy", "title": "Luren i fickan", "year": 2015, "url": "spotify:track:3YAs2Cz1DeYEUPn5G1p9IM"}, {"id": "4EdnF9XCU3d45DOcw8WTpR", "artist": "Albin Johnsén;Kristin Amparo", "title": "Din soldat", "year": 2015, "url": "spotify:track:4EdnF9XCU3d45DOcw8WTpR"}, {"id": "6EnNjWkk1YX3fsTXtwO773", "artist": "Hasse Andersson", "title": "Guld och gröna skogar", "year": 2015, "url": "spotify:track:6EnNjWkk1YX3fsTXtwO773"}, {"id": "0milNfD6Cq6hnb702irLpf", "artist": "Lokal;Ibbe;Patryk", "title": "Havet är djupt", "year": 2015, "url": "spotify:track:0milNfD6Cq6hnb702irLpf"}, {"id": "1SZDQMXX1FrA97YY7Lt3Fj", "artist": "Miriam Bryant", "title": "Ett sista glas", "year": 2015, "url": "spotify:track:1SZDQMXX1FrA97YY7Lt3Fj"}, {"id": "153G9eQ7m3aex2HPAC6b1Z", "artist": "Larz-Kristerz", "title": "Carina", "year": 2015, "url": "spotify:track:153G9eQ7m3aex2HPAC6b1Z"}, {"id": "54dCnWVg3FtggSSSHCB4ak", "artist": "Amanda Jenssen", "title": "When We Dig for Gold In the USA", "year": 2015, "url": "spotify:track:54dCnWVg3FtggSSSHCB4ak"}, {"id": "21BYhl07wWqGRQaj7sUxdV", "artist": "Måns Zelmerlöw", "title": "Heroes", "year": 2015, "url": "spotify:track:21BYhl07wWqGRQaj7sUxdV"}, {"id": "0Cwf4vXrawZbqQYNSSHH4Q", "artist": "Larz-Kristerz", "title": "Det måste gå att dansa till", "year": 2015, "url": "spotify:track:0Cwf4vXrawZbqQYNSSHH4Q"}, {"id": "3resBvGD5Qj09Ki1WRVy48", "artist": "Regimen", "title": "Bira bärs - Radio Edit", "year": 2015, "url": "spotify:track:3resBvGD5Qj09Ki1WRVy48"}, {"id": "0PlZWta0uxJe8TKuTvZqc2", "artist": "Amanda Jenssen", "title": "Do You Love Me", "year": 2015, "url": "spotify:track:0PlZWta0uxJe8TKuTvZqc2"}, {"id": "0yVz6D9z7pH6IyiOtnwv5e", "artist": "Den svenska björnstammen;047", "title": "Förlåta eller svika", "year": 2015, "url": "spotify:track:0yVz6D9z7pH6IyiOtnwv5e"}, {"id": "41x3ZKNA4d2zRHgdKS9t9k", "artist": "Joel Alme", "title": "Backa tiden", "year": 2015, "url": "spotify:track:41x3ZKNA4d2zRHgdKS9t9k"}, {"id": "4h3pqTNfE8TPLP5SWZjoU6", "artist": "Badpojken;Frida Green", "title": "Johnny G (The Guidetti Song) (feat. Frida Green)", "year": 2015, "url": "spotify:track:4h3pqTNfE8TPLP5SWZjoU6"}, {"id": "6szFMhkTzMxIvFTp6adLq1", "artist": "Drömhus;Therese", "title": "Vill ha dig 2015 (feat. Therese) - In Stereo Radio Edit", "year": 2015, "url": "spotify:track:6szFMhkTzMxIvFTp6adLq1"}, {"id": "6CSpzGTrIibj5aObFToJ70", "artist": "Joel Alme", "title": "Håller mig på kanten", "year": 2015, "url": "spotify:track:6CSpzGTrIibj5aObFToJ70"}, {"id": "1esiASrlFXBkqzPZVswYNM", "artist": "Mares", "title": "Allt du gör och att du finns", "year": 2015, "url": "spotify:track:1esiASrlFXBkqzPZVswYNM"}, {"id": "1c3RPquwmsQAJKWrWUkl6m", "artist": "Medina", "title": "Se på mig nu", "year": 2015, "url": "spotify:track:1c3RPquwmsQAJKWrWUkl6m"}, {"id": "6qjYBkoKcMRjQkVfwDU2Te", "artist": "Darin", "title": "Ta mig tillbaka", "year": 2015, "url": "spotify:track:6qjYBkoKcMRjQkVfwDU2Te"}, {"id": "6y1dfWH5Z52RJJ6UJHSfos", "artist": "kent", "title": "Kärleken väntar", "year": 2016, "url": "spotify:track:6y1dfWH5Z52RJJ6UJHSfos"}, {"id": "22UVFPzTchH7w5SqgHl501", "artist": "kent", "title": "Sverige", "year": 2016, "url": "spotify:track:22UVFPzTchH7w5SqgHl501"}, {"id": "0QTFPzSB1VPM5tGq8HNpAE", "artist": "kent", "title": "Musik Non Stop", "year": 2016, "url": "spotify:track:0QTFPzSB1VPM5tGq8HNpAE"}, {"id": "1J8teo08q8FlNWIJh9QFr3", "artist": "Danny Saucedo", "title": "Dör för dig", "year": 2016, "url": "spotify:track:1J8teo08q8FlNWIJh9QFr3"}, {"id": "7rklm17yoayxw45lpzv5uv", "artist": "Petter;Linnea Henriksson", "title": "Se på mig nu (feat. Linnea Henriksson) - Singelversion", "year": 2016, "url": "spotify:track:7rklm17yoayxw45lpzv5uv"}, {"id": "25V8NDi9if73rYvHwDKKw5", "artist": "Norlie & KKV", "title": "Ingen annan rör mig som du", "year": 2016, "url": "spotify:track:25V8NDi9if73rYvHwDKKw5"}, {"id": "0OWWwH0IRJm3njG2ewmlWa", "artist": "Danny Saucedo;Malcolm B", "title": "Brinner i bröstet (feat. Malcolm B)", "year": 2016, "url": "spotify:track:0OWWwH0IRJm3njG2ewmlWa"}, {"id": "0rleRAsgvRKxBVf44lmcY7", "artist": "Danny Saucedo", "title": "Snacket på stan", "year": 2016, "url": "spotify:track:0rleRAsgvRKxBVf44lmcY7"}, {"id": "6oDkCmfVcSd9NXAKk1b4Ll", "artist": "Frans", "title": "If I Were Sorry", "year": 2016, "url": "spotify:track:6oDkCmfVcSd9NXAKk1b4Ll"}, {"id": "2lWIShFroC58eaaU77tmjA", "artist": "Jonathan Johansson", "title": "Rosa himmel", "year": 2016, "url": "spotify:track:2lWIShFroC58eaaU77tmjA"}, {"id": "5Zht5KNputEifwWCjHcmsb", "artist": "Sarah Dawn Finer", "title": "Kärleksvisan", "year": 2016, "url": "spotify:track:5Zht5KNputEifwWCjHcmsb"}, {"id": "2c1EGwagV1sT73NimGsqIh", "artist": "Peg Parnevik", "title": "Ain't No Saint", "year": 2016, "url": "spotify:track:2c1EGwagV1sT73NimGsqIh"}, {"id": "5tZPmEPqAcFVyxaEcU3cvP", "artist": "Danny Saucedo;Tensta Gospel", "title": "Så som i himlen (feat. Tensta Gospel)", "year": 2016, "url": "spotify:track:5tZPmEPqAcFVyxaEcU3cvP"}, {"id": "7bCV5n3FGxgNf5eHp0wZZp", "artist": "kent", "title": "Egoist", "year": 2016, "url": "spotify:track:7bCV5n3FGxgNf5eHp0wZZp"}, {"id": "7dWJBwpPuUWqUoTZ0FXQg5", "artist": "Danny Saucedo", "title": "Super 8", "year": 2016, "url": "spotify:track:7dWJBwpPuUWqUoTZ0FXQg5"}, {"id": "6qB7YcFpeBEQa0D6QO482y", "artist": "Roxette", "title": "It Must Have Been Love - From the Film \"Pretty Woman\"", "year": 2016, "url": "spotify:track:6qB7YcFpeBEQa0D6QO482y"}, {"id": "6euVNa77wkWpTs0WQrLtUM", "artist": "Dansbandskungen", "title": "Sup dig snygg", "year": 2016, "url": "spotify:track:6euVNa77wkWpTs0WQrLtUM"}, {"id": "4YIM1KWDXTPNbE5f4Z5xvj", "artist": "State of Sound;Viktor Norén;Gustaf Norén", "title": "Uti vår hage (feat. Viktor Norén & Gustaf Norén)", "year": 2016, "url": "spotify:track:4YIM1KWDXTPNbE5f4Z5xvj"}, {"id": "58eqhe4CIuvHW8X2eBlFzC", "artist": "kent", "title": "Kräm (så nära får ingen gå)", "year": 2016, "url": "spotify:track:58eqhe4CIuvHW8X2eBlFzC"}, {"id": "7ADKspOjo3n2nC6azfWLZX", "artist": "Byz", "title": "Karatefylla 2.0 - Radio Version", "year": 2016, "url": "spotify:track:7ADKspOjo3n2nC6azfWLZX"}, {"id": "6dJc9S96pAZdwA2gSr4dD8", "artist": "John De Sohn;Albin Johnsén;Mattias Andréasson", "title": "En runda till", "year": 2016, "url": "spotify:track:6dJc9S96pAZdwA2gSr4dD8"}, {"id": "3eUUyE4sfk9UDlWecL0j6E", "artist": "Södra Station", "title": "Hatar att jag saknar dig", "year": 2016, "url": "spotify:track:3eUUyE4sfk9UDlWecL0j6E"}, {"id": "2FnUyLhe7sjXgnZlK9sc0z", "artist": "Laleh", "title": "Bara Få Va Mig Själv", "year": 2016, "url": "spotify:track:2FnUyLhe7sjXgnZlK9sc0z"}, {"id": "22WmW6zfWvJAhuIMfu7geX", "artist": "Jobe", "title": "Vart står vi nu", "year": 2016, "url": "spotify:track:22WmW6zfWvJAhuIMfu7geX"}, {"id": "1fdHSBj03Zh8m5FzH391AE", "artist": "kent", "title": "Vi är inte längre där", "year": 2016, "url": "spotify:track:1fdHSBj03Zh8m5FzH391AE"}, {"id": "2KkXX4e0yDwPEDkaTfPqNP", "artist": "kent", "title": "747", "year": 2016, "url": "spotify:track:2KkXX4e0yDwPEDkaTfPqNP"}, {"id": "4R8Psrq4XoEX6FV3a76KSY", "artist": "Danny Saucedo", "title": "För kärlekens skull", "year": 2016, "url": "spotify:track:4R8Psrq4XoEX6FV3a76KSY"}, {"id": "3bXntWHHOFwLdY3u0NnthP", "artist": "Norlie & KKV", "title": "Din Idiot", "year": 2016, "url": "spotify:track:3bXntWHHOFwLdY3u0NnthP"}, {"id": "10tZablwJjnyBV8SO8lJxF", "artist": "Dr Kärlek", "title": "Fin i bikini", "year": 2016, "url": "spotify:track:10tZablwJjnyBV8SO8lJxF"}, {"id": "04LHuPqOMSpnHFaziPq1qO", "artist": "Håkan Hellström;Otto Knows", "title": "Din tid kommer - Otto Knows Remix", "year": 2016, "url": "spotify:track:04LHuPqOMSpnHFaziPq1qO"}, {"id": "0gZGgHr4QcMa5tpA9qxUqV", "artist": "Panetoz", "title": "Håll om mig hårt", "year": 2016, "url": "spotify:track:0gZGgHr4QcMa5tpA9qxUqV"}, {"id": "7ihOAPfUkJPrIAiQEv9GfW", "artist": "Mares", "title": "Cyklar ni så springer jag", "year": 2016, "url": "spotify:track:7ihOAPfUkJPrIAiQEv9GfW"}, {"id": "7nriQOQo6oaMoD3ZBBP7cX", "artist": "Kaliffa", "title": "Spontanitet", "year": 2016, "url": "spotify:track:7nriQOQo6oaMoD3ZBBP7cX"}, {"id": "59DwURJ0WLFVKxUBqcBp29", "artist": "Danny Saucedo", "title": "Hör vad du säger men jag har glömt vad du sa", "year": 2016, "url": "spotify:track:59DwURJ0WLFVKxUBqcBp29"}, {"id": "5zC3m7fsSmVtCP5f2GTX2x", "artist": "Havet", "title": "Kyss bort allt det onda", "year": 2017, "url": "spotify:track:5zC3m7fsSmVtCP5f2GTX2x"}, {"id": "1rIKgCH4H52lrvDcz50hS8", "artist": "Zara Larsson", "title": "Lush Life", "year": 2017, "url": "spotify:track:1rIKgCH4H52lrvDcz50hS8"}, {"id": "0KqNAZABm08asFCFYfDDAg", "artist": "Dani M;Jacco", "title": "Nån Annan", "year": 2017, "url": "spotify:track:0KqNAZABm08asFCFYfDDAg"}, {"id": "6yuG9MJgec1f18LA7fWJW0", "artist": "JLC", "title": "Sommar sommar sol", "year": 2017, "url": "spotify:track:6yuG9MJgec1f18LA7fWJW0"}, {"id": "0MynjNLlp9gUg8OgNOlGqO", "artist": "Kick", "title": "Fest hos mig - Sommar 2008 Remix", "year": 2017, "url": "spotify:track:0MynjNLlp9gUg8OgNOlGqO"}, {"id": "3rfu2aPwLJhsrzijPeLaPe", "artist": "Arvingarna", "title": "Johanna", "year": 2017, "url": "spotify:track:3rfu2aPwLJhsrzijPeLaPe"}, {"id": "1rDQBsXZoyjou8TvUjKX3T", "artist": "Arvingarna", "title": "Kung i stan", "year": 2017, "url": "spotify:track:1rDQBsXZoyjou8TvUjKX3T"}, {"id": "2hqycTvN1LuEOaiHvTjMBf", "artist": "Per Gessle;Lars Winnerbäck", "title": "Småstadsprat", "year": 2017, "url": "spotify:track:2hqycTvN1LuEOaiHvTjMBf"}, {"id": "4s3u3P0UiSUBFEcHvifOCX", "artist": "Arvingarna", "title": "Semester", "year": 2017, "url": "spotify:track:4s3u3P0UiSUBFEcHvifOCX"}, {"id": "70R0JGCHyprYZUxYkrKJIO", "artist": "De Vet Du", "title": "Fy Fan Va Stek", "year": 2017, "url": "spotify:track:70R0JGCHyprYZUxYkrKJIO"}, {"id": "2XajET1AbW1AYBgTVJvDo3", "artist": "Mares", "title": "95", "year": 2017, "url": "spotify:track:2XajET1AbW1AYBgTVJvDo3"}, {"id": "6uucB29G6Y7LThzNfuRkiw", "artist": "Kaliffa", "title": "Helt seriöst", "year": 2017, "url": "spotify:track:6uucB29G6Y7LThzNfuRkiw"}, {"id": "0lcR3nqHp3wolqFmU3OxZS", "artist": "Darin", "title": "Ja må du leva", "year": 2017, "url": "spotify:track:0lcR3nqHp3wolqFmU3OxZS"}, {"id": "6uhxfYYqt2NTVfQfFbfI1w", "artist": "Tjuvjakt", "title": "Tårarna i halsen", "year": 2017, "url": "spotify:track:6uhxfYYqt2NTVfQfFbfI1w"}, {"id": "2vD1hN8Oxqfh4umefOVIqP", "artist": "Hov1", "title": "Mandy Moore", "year": 2017, "url": "spotify:track:2vD1hN8Oxqfh4umefOVIqP"}, {"id": "2N7claLHWD1ypZARTJNtjI", "artist": "Petter;Madi Banja", "title": "Toppen av ett berg", "year": 2018, "url": "spotify:track:2N7claLHWD1ypZARTJNtjI"}, {"id": "5an6BWQDhw4FnjZhdyOFuL", "artist": "Molly Sandén", "title": "Kär i din kärlek - Recorded at Spotify Studios Stockholm", "year": 2018, "url": "spotify:track:5an6BWQDhw4FnjZhdyOFuL"}, {"id": "5GC6b6Ukc7PfwG8VfYO3ar", "artist": "Norlie & KKV;estraden", "title": "Mer för varandra", "year": 2018, "url": "spotify:track:5GC6b6Ukc7PfwG8VfYO3ar"}, {"id": "2bhRDMgssdQXr7o9J4Tykr", "artist": "State of Sound;Linnea Henriksson", "title": "Den första gång jag såg dig (feat. Linnea Henriksson)", "year": 2018, "url": "spotify:track:2bhRDMgssdQXr7o9J4Tykr"}, {"id": "6MBdDRInVWsv2ZEH8Pvrjy", "artist": "Tove Styrke", "title": "Mistakes", "year": 2018, "url": "spotify:track:6MBdDRInVWsv2ZEH8Pvrjy"}, {"id": "2CtulN3uMMD4YOyGSjuYP4", "artist": "Molly Sandén", "title": "Rygg mot rygg", "year": 2018, "url": "spotify:track:2CtulN3uMMD4YOyGSjuYP4"}, {"id": "70wiq6FhoPiGg7IgqNjZEO", "artist": "Petter;Vargas & Lagola", "title": "Lev nu dö sen (feat. Vargas & Lagola)", "year": 2018, "url": "spotify:track:70wiq6FhoPiGg7IgqNjZEO"}, {"id": "1aEU7mcRDTYBB4ASpqbjYE", "artist": "Hov1", "title": "Hon dansar vidare i livet", "year": 2018, "url": "spotify:track:1aEU7mcRDTYBB4ASpqbjYE"}, {"id": "7ubsWTUPIhre8dZiJLZ4cP", "artist": "Miss Li", "title": "Lev nu dö sen", "year": 2019, "url": "spotify:track:7ubsWTUPIhre8dZiJLZ4cP"}, {"id": "5iJLphnVyGpLeAcsOZSfhw", "artist": "Veronica Maggio", "title": "Tillfälligheter", "year": 2019, "url": "spotify:track:5iJLphnVyGpLeAcsOZSfhw"}, {"id": "0pGX4KgirIW7JAHh93rzPU", "artist": "Arvingarna", "title": "I Do", "year": 2019, "url": "spotify:track:0pGX4KgirIW7JAHh93rzPU"}, {"id": "71q2qYTo4BzqNGpy5S7vV3", "artist": "Myra Granberg", "title": "Tills mitt hjärta går under", "year": 2019, "url": "spotify:track:71q2qYTo4BzqNGpy5S7vV3"}, {"id": "10us5dfi90LZXjrq8Dwep7", "artist": "GAMMAL", "title": "Sånger från förut", "year": 2019, "url": "spotify:track:10us5dfi90LZXjrq8Dwep7"}, {"id": "0jKrDRQcTkvcJLJMj00AAO", "artist": "GAMMAL", "title": "Blommor där du står", "year": 2019, "url": "spotify:track:0jKrDRQcTkvcJLJMj00AAO"}, {"id": "23PJqdjssVlOJlKvhQe5o9", "artist": "Carola;Zara Larsson", "title": "Säg Mig Var Du Står", "year": 2020, "url": "spotify:track:23PJqdjssVlOJlKvhQe5o9"}, {"id": "4SS4YfDAEQG0fZAe1xfgn3", "artist": "Victor Leksell", "title": "Svag", "year": 2020, "url": "spotify:track:4SS4YfDAEQG0fZAe1xfgn3"}, {"id": "2U8MK6O02FVG2DDTY9ttyv", "artist": "estraden;Tjuvjakt", "title": "Vårt år", "year": 2020, "url": "spotify:track:2U8MK6O02FVG2DDTY9ttyv"}, {"id": "2YjWAJEES4VMcwoOWvqk08", "artist": "Myra Granberg", "title": "HKF (Håll käften & försvinn)", "year": 2020, "url": "spotify:track:2YjWAJEES4VMcwoOWvqk08"}, {"id": "05HKKlHqE1HJ1oIqXpJ7yI", "artist": "Newkid", "title": "Kanske var vi rätt bra ändå", "year": 2020, "url": "spotify:track:05HKKlHqE1HJ1oIqXpJ7yI"}, {"id": "6tkvkyjha4cq0ZRzOGz3Mv", "artist": "Newkid", "title": "Du måste finnas", "year": 2020, "url": "spotify:track:6tkvkyjha4cq0ZRzOGz3Mv"}, {"id": "00luqtaQ7gIO8byEgh1xWs", "artist": "Svenne Rubins", "title": "Folköl och dunka-dunka - Live", "year": 2020, "url": "spotify:track:00luqtaQ7gIO8byEgh1xWs"}, {"id": "6pgZeXZxdJM8uG7DB52SPj", "artist": "Victor Leksell", "title": "Tappat", "year": 2020, "url": "spotify:track:6pgZeXZxdJM8uG7DB52SPj"}, {"id": "6FY1QdP2WeXZ73ERGaSXVN", "artist": "Victor Leksell", "title": "Ha dig igen", "year": 2020, "url": "spotify:track:6FY1QdP2WeXZ73ERGaSXVN"}, {"id": "0U04rQKFeBhMKDOEc8NYjk", "artist": "Molly Sandén;Victor Leksell;Joakim Berg", "title": "Sverige", "year": 2020, "url": "spotify:track:0U04rQKFeBhMKDOEc8NYjk"}, {"id": "5WWQnyxA6EC2FxNI5MhCxB", "artist": "estraden;Victor Leksell", "title": "Bra för dig", "year": 2020, "url": "spotify:track:5WWQnyxA6EC2FxNI5MhCxB"}, {"id": "2YdXecjfECHt5P7bv8XVA6", "artist": "Victor Leksell", "title": "Klär av dig", "year": 2020, "url": "spotify:track:2YdXecjfECHt5P7bv8XVA6"}, {"id": "5SY5BWTxbDqFouuAdelFV9", "artist": "Victor Leksell", "title": "Svag", "year": 2020, "url": "spotify:track:5SY5BWTxbDqFouuAdelFV9"}, {"id": "73hiGuj0dxhA1YhmSJOcMF", "artist": "Albin Lee Meldau", "title": "Josefin", "year": 2021, "url": "spotify:track:73hiGuj0dxhA1YhmSJOcMF"}, {"id": "5D2ZobLrLLFcPoOWw5YE0e", "artist": "Myra Granberg", "title": "Lose my mind", "year": 2021, "url": "spotify:track:5D2ZobLrLLFcPoOWw5YE0e"}, {"id": "7iSuirVvJsBXZ95UEd9vQ0", "artist": "Molly Sandén", "title": "Vi ska aldrig gå hem", "year": 2021, "url": "spotify:track:7iSuirVvJsBXZ95UEd9vQ0"}, {"id": "7zKTQhQPCGnh2PgP93Pxsu", "artist": "Miss Li", "title": "Instruktionsboken", "year": 2021, "url": "spotify:track:7zKTQhQPCGnh2PgP93Pxsu"}, {"id": "4QKscNaTs47Zv3QV9o62yX", "artist": "Miss Li", "title": "Komplicerad", "year": 2021, "url": "spotify:track:4QKscNaTs47Zv3QV9o62yX"}, {"id": "6BT8CwzsMOi2FSIDa5zZwN", "artist": "Thomas Stenström", "title": "Hej hallå!", "year": 2021, "url": "spotify:track:6BT8CwzsMOi2FSIDa5zZwN"}, {"id": "7mo7CfYuvDyhP4C63SJKnV", "artist": "Myra Granberg", "title": "Jag kommer - Spotify Studio It's Hits Recording", "year": 2021, "url": "spotify:track:7mo7CfYuvDyhP4C63SJKnV"}, {"id": "1ZJdjsCEdolnRN83W9dWiX", "artist": "Victor Leksell", "title": "Snälla bli min - Spotify Studio It's Hits Recording", "year": 2021, "url": "spotify:track:1ZJdjsCEdolnRN83W9dWiX"}, {"id": "6PsjkCsky6zazqsFp7fswp", "artist": "Molly Sandén;Newkid", "title": "Jag mår bra nu (feat. Newkid)", "year": 2021, "url": "spotify:track:6PsjkCsky6zazqsFp7fswp"}, {"id": "4SQGtL9oAoTcgxPleSPA5H", "artist": "Arvingarna", "title": "Tänker inte alls gå hem", "year": 2021, "url": "spotify:track:4SQGtL9oAoTcgxPleSPA5H"}, {"id": "0ln3ddVLRoA8HCXvMW5GSH", "artist": "Thomas Stenström;Miriam Bryant", "title": "Gubben i lådan (feat. Miriam Bryant)", "year": 2021, "url": "spotify:track:0ln3ddVLRoA8HCXvMW5GSH"}, {"id": "5IZGN81VVgBv1lPrjXzOD6", "artist": "Miriam Bryant;Victor Leksell", "title": "tystnar i luren", "year": 2021, "url": "spotify:track:5IZGN81VVgBv1lPrjXzOD6"}, {"id": "3Tp6XRivI85TAfpgja9ILh", "artist": "Miss Li", "title": "X", "year": 2022, "url": "spotify:track:3Tp6XRivI85TAfpgja9ILh"}, {"id": "1QWzq7PXckcLxBwV8MQLjH", "artist": "Kenneth & The Knutters", "title": "Som en riktig man", "year": 2022, "url": "spotify:track:1QWzq7PXckcLxBwV8MQLjH"}, {"id": "28TGtp6irVUZhTv5ytdex1", "artist": "Thomas Stenström", "title": "Sista sommaren", "year": 2022, "url": "spotify:track:28TGtp6irVUZhTv5ytdex1"}, {"id": "1Zw44gXDnqeio5EY9QrMEF", "artist": "Kenneth & The Knutters", "title": "Ge mig en öl", "year": 2022, "url": "spotify:track:1Zw44gXDnqeio5EY9QrMEF"}, {"id": "07l5IJqrY6ERJw7HNdnM0G", "artist": "Victor Leksell", "title": "Hela världen är min", "year": 2022, "url": "spotify:track:07l5IJqrY6ERJw7HNdnM0G"}, {"id": "6XOPzRqNEhkDVVxbqTcpou", "artist": "Danzbanderz", "title": "En kväll i juni", "year": 2022, "url": "spotify:track:6XOPzRqNEhkDVVxbqTcpou"}, {"id": "2CyOfxn9TkmBml8ZNBIcZf", "artist": "Lucianoz", "title": "Inget stoppar oss nu", "year": 2023, "url": "spotify:track:2CyOfxn9TkmBml8ZNBIcZf"}, {"id": "4fSyd0K4fzY0ExNu0SlY11", "artist": "Svenne Rubins", "title": "En gammal Amazon - 2023 Master", "year": 2023, "url": "spotify:track:4fSyd0K4fzY0ExNu0SlY11"}, {"id": "1S6DSE6xXdlAUT52z1bk1n", "artist": "Lovet", "title": "Asteroid", "year": 2023, "url": "spotify:track:1S6DSE6xXdlAUT52z1bk1n"}]);
+addPlaylist('mello','187 Melodifestivalen · 2002–2026',[{"id": "3dSbsdPNpH28iSl3nTi1VP", "artist": "Hanna Hedlund;Lina Hedlund", "title": "Big Time Party", "year": 2002, "url": "spotify:track:3dSbsdPNpH28iSl3nTi1VP"}, {"id": "4wLWZx74WHOosQq5p8VVkL", "artist": "Sarek", "title": "Genom Eld & Vatten", "year": 2003, "url": "spotify:track:4wLWZx74WHOosQq5p8VVkL"}, {"id": "51md9KzX92LQh84mUsaPPD", "artist": "Lena Philipsson", "title": "Det gör ont", "year": 2004, "url": "spotify:track:51md9KzX92LQh84mUsaPPD"}, {"id": "1LmZ5COIv2zVF83oDH5TG9", "artist": "Alcazar", "title": "Alcastar", "year": 2005, "url": "spotify:track:1LmZ5COIv2zVF83oDH5TG9"}, {"id": "6LjXwyNIh30VWsnvT8JHhz", "artist": "Nanne", "title": "Håll om mig", "year": 2005, "url": "spotify:track:6LjXwyNIh30VWsnvT8JHhz"}, {"id": "4IV8dOSLi26stONnuQg8Kf", "artist": "Linda Bengtzing", "title": "Jag ljuger så bra", "year": 2006, "url": "spotify:track:4IV8dOSLi26stONnuQg8Kf"}, {"id": "7uSr7Ye24xIh6rxRzDWNCu", "artist": "The Poodles", "title": "Night Of Passion", "year": 2006, "url": "spotify:track:7uSr7Ye24xIh6rxRzDWNCu"}, {"id": "4WXnFwrGkrGYzwCImeuob6", "artist": "After Dark", "title": "(Åh) När ni tar saken i egna händer", "year": 2007, "url": "spotify:track:4WXnFwrGkrGYzwCImeuob6"}, {"id": "6yk6jU3Ia33ed2XL4V9IeW", "artist": "Magnus Carlsson", "title": "Live Forever", "year": 2007, "url": "spotify:track:6yk6jU3Ia33ed2XL4V9IeW"}, {"id": "5gusiYyrR3GedvX7vEtJYw", "artist": "H.E.A.T", "title": "1000 miles", "year": 2008, "url": "spotify:track:5gusiYyrR3GedvX7vEtJYw"}, {"id": "4HsSrN8zxZx7arACiMYhZu", "artist": "Nordman", "title": "I lågornas sken", "year": 2008, "url": "spotify:track:4HsSrN8zxZx7arACiMYhZu"}, {"id": "2eAgErGWqrXow47SjwTqMp", "artist": "Rongedal", "title": "Just A Minute", "year": 2008, "url": "spotify:track:2eAgErGWqrXow47SjwTqMp"}, {"id": "1nVBVZfsn3VokG8fIhbEuB", "artist": "BWO", "title": "Lay Your Love On Me", "year": 2008, "url": "spotify:track:1nVBVZfsn3VokG8fIhbEuB"}, {"id": "597NerobfkV9DhKCySXXWF", "artist": "Nick Borgen", "title": "World Wide Web", "year": 2008, "url": "spotify:track:597NerobfkV9DhKCySXXWF"}, {"id": "55XpXSN77QyoudQmlg8j8q", "artist": "Charlotte Perrelli", "title": "Hero", "year": 2008, "url": "spotify:track:55XpXSN77QyoudQmlg8j8q"}, {"id": "59scqF8FynVEV5kJtoj4yj", "artist": "Alcazar", "title": "Stay The Night", "year": 2009, "url": "spotify:track:59scqF8FynVEV5kJtoj4yj"}, {"id": "5Q7UOn2CH8eCU9sjoJhWov", "artist": "Nina Söderquist", "title": "Tick Tock", "year": 2009, "url": "spotify:track:5Q7UOn2CH8eCU9sjoJhWov"}, {"id": "14n9H1FAObK0OsUZLoLiGZ", "artist": "Måns Zelmerlöw", "title": "Hope and Glory", "year": 2009, "url": "spotify:track:14n9H1FAObK0OsUZLoLiGZ"}, {"id": "2dNGMU5isZjuRiNwzKDTCj", "artist": "Lili & Susie", "title": "Show Me Heaven", "year": 2009, "url": "spotify:track:2dNGMU5isZjuRiNwzKDTCj"}, {"id": "52iMLtr3V7EenocLKoZZ2X", "artist": "Timoteij", "title": "Kom", "year": 2010, "url": "spotify:track:52iMLtr3V7EenocLKoZZ2X"}, {"id": "0cH3Fk2FKjblnoSwAaB1Mw", "artist": "Nanne", "title": "Avundsjuk", "year": 2010, "url": "spotify:track:0cH3Fk2FKjblnoSwAaB1Mw"}, {"id": "6BhB2xdAzeH8PWqr7qNeUw", "artist": "Pernilla Wahlgren", "title": "Jag vill om du vågar", "year": 2010, "url": "spotify:track:6BhB2xdAzeH8PWqr7qNeUw"}, {"id": "0j14h8pKMjjoEzd7DatOgb", "artist": "Ola", "title": "Unstoppable (The Return of Natalie)", "year": 2010, "url": "spotify:track:0j14h8pKMjjoEzd7DatOgb"}, {"id": "5KVE8snJd5TmKq4RjUNY4C", "artist": "Marie Serneholt", "title": "Salt and Pepper", "year": 2011, "url": "spotify:track:5KVE8snJd5TmKq4RjUNY4C"}, {"id": "0ETVZEVDPMwOGkN7UOd8qi", "artist": "Dead by April", "title": "Mystery", "year": 2012, "url": "spotify:track:0ETVZEVDPMwOGkN7UOd8qi"}, {"id": "33qw98yPnShEQMoF72ORUa", "artist": "Danny Saucedo", "title": "Amazing", "year": 2012, "url": "spotify:track:33qw98yPnShEQMoF72ORUa"}, {"id": "4xoR9WY2Y9nGHLxIzQ465L", "artist": "Loreen", "title": "Euphoria - Single Version", "year": 2013, "url": "spotify:track:4xoR9WY2Y9nGHLxIzQ465L"}, {"id": "6l2PN8cMiIJlgUT2lpaqWO", "artist": "Ted Gärdestad", "title": "Satellit", "year": 2013, "url": "spotify:track:6l2PN8cMiIJlgUT2lpaqWO"}, {"id": "5EUp5JRSas4g3fyxqRSQUn", "artist": "Eric Saade", "title": "Popular", "year": 2013, "url": "spotify:track:5EUp5JRSas4g3fyxqRSQUn"}, {"id": "0UI7rG62bXLImTzYR8w7Rn", "artist": "Sanna Nielsen", "title": "Empty Room", "year": 2013, "url": "spotify:track:0UI7rG62bXLImTzYR8w7Rn"}, {"id": "1rLrArRq0gHrrfhfmf25Ug", "artist": "Pernilla Wahlgren", "title": "Picadilly Circus", "year": 2013, "url": "spotify:track:1rLrArRq0gHrrfhfmf25Ug"}, {"id": "4IuKjpCGCKNSyvKFM8G53a", "artist": "Tommy Körberg", "title": "Stad i ljus", "year": 2013, "url": "spotify:track:4IuKjpCGCKNSyvKFM8G53a"}, {"id": "5MEJ16DOa6atXjQk2BRuPP", "artist": "Linda Bengtzing", "title": "Alla flickor", "year": 2013, "url": "spotify:track:5MEJ16DOa6atXjQk2BRuPP"}, {"id": "67Dty03PqDZtnaNxMNF5Wd", "artist": "Björn Skifs", "title": "Michelangelo (Men så svara då!)", "year": 2013, "url": "spotify:track:67Dty03PqDZtnaNxMNF5Wd"}, {"id": "5j4pszCXNu9mA7nXpClgem", "artist": "Lasse Holm;Monica Thörnell", "title": "E' de' det här du kallar kärlek", "year": 2013, "url": "spotify:track:5j4pszCXNu9mA7nXpClgem"}, {"id": "2JaJegLpuY3YcneLfyd8wR", "artist": "Afro-Dite", "title": "Never Let It Go", "year": 2013, "url": "spotify:track:2JaJegLpuY3YcneLfyd8wR"}, {"id": "4aA6Am55xBzgA3lR324pG3", "artist": "Alcazar", "title": "Not A Sinner Nor A Saint", "year": 2013, "url": "spotify:track:4aA6Am55xBzgA3lR324pG3"}, {"id": "3COMRhWNn4Pj4kiKSNP5v2", "artist": "David Lindgren", "title": "Shout It Out", "year": 2013, "url": "spotify:track:3COMRhWNn4Pj4kiKSNP5v2"}, {"id": "0wJpaRZXFZ0wkxesd37EZK", "artist": "Tomas Ledin", "title": "Just nu", "year": 2013, "url": "spotify:track:0wJpaRZXFZ0wkxesd37EZK"}, {"id": "5U4HHoXUdLcynJVQUqc8tM", "artist": "Sarah Dawn Finer", "title": "Moving On", "year": 2013, "url": "spotify:track:5U4HHoXUdLcynJVQUqc8tM"}, {"id": "2RSAkK7fkhQCEAH4fZ0f3H", "artist": "Fame", "title": "Give Me Your Love", "year": 2013, "url": "spotify:track:2RSAkK7fkhQCEAH4fZ0f3H"}, {"id": "1MKnczkbL1Itv9ZmBuM3qj", "artist": "Herreys", "title": "Diggi-Loo Diggi-Ley", "year": 2013, "url": "spotify:track:1MKnczkbL1Itv9ZmBuM3qj"}, {"id": "1nWudYVIxiRRouHr69L8Dj", "artist": "Malena Ernman", "title": "La Voix", "year": 2013, "url": "spotify:track:1nWudYVIxiRRouHr69L8Dj"}, {"id": "1bjNeIeyg6jRxflHn0PBTb", "artist": "Arja Saijonmaa", "title": "Högt över havet", "year": 2013, "url": "spotify:track:1bjNeIeyg6jRxflHn0PBTb"}, {"id": "1C1MsxDlu71m478JSIF0UH", "artist": "Danny", "title": "In The Club", "year": 2013, "url": "spotify:track:1C1MsxDlu71m478JSIF0UH"}, {"id": "6imN9LltchoOOK79LfEhXH", "artist": "Arvingarna", "title": "Eloise", "year": 2013, "url": "spotify:track:6imN9LltchoOOK79LfEhXH"}, {"id": "2q37Jsxux3EZ5soG82rs9w", "artist": "Tommy Nilsson", "title": "En Dag", "year": 2013, "url": "spotify:track:2q37Jsxux3EZ5soG82rs9w"}, {"id": "3ErSUpbvl1nvdpIul3jJhb", "artist": "Martin Stenmarck", "title": "Las Vegas", "year": 2013, "url": "spotify:track:3ErSUpbvl1nvdpIul3jJhb"}, {"id": "35t5SyIQ1a5HLWx0aj8Z35", "artist": "Carola", "title": "Evighet", "year": 2013, "url": "spotify:track:35t5SyIQ1a5HLWx0aj8Z35"}, {"id": "3Gv6gQOreWmzxToRjnu4cd", "artist": "After Dark", "title": "La Dolce Vita", "year": 2013, "url": "spotify:track:3Gv6gQOreWmzxToRjnu4cd"}, {"id": "6Y8uLLWWn5flQ4tb4pnyB5", "artist": "Måns Zelmerlöw", "title": "Cara mia", "year": 2013, "url": "spotify:track:6Y8uLLWWn5flQ4tb4pnyB5"}, {"id": "6ODgVzRo2S89zKAF9mg8U3", "artist": "Björn Skifs", "title": "Fångad i en dröm", "year": 2013, "url": "spotify:track:6ODgVzRo2S89zKAF9mg8U3"}, {"id": "6pfXNfejwIOQbzr4RdCJ1h", "artist": "Lena Philipsson", "title": "Dansa i neon", "year": 2013, "url": "spotify:track:6pfXNfejwIOQbzr4RdCJ1h"}, {"id": "4PesL0Ri271WvmrPRyS12P", "artist": "Carola", "title": "Fångad av en stormvind", "year": 2013, "url": "spotify:track:4PesL0Ri271WvmrPRyS12P"}, {"id": "5FvuvGDcTWoyDFrJOuoynB", "artist": "The Ark", "title": "The Worrying Kind", "year": 2013, "url": "spotify:track:5FvuvGDcTWoyDFrJOuoynB"}, {"id": "4iLPgjnkj1R4sofACPSAdB", "artist": "Eric Saade", "title": "Manboy", "year": 2013, "url": "spotify:track:4iLPgjnkj1R4sofACPSAdB"}, {"id": "3y4D84anX7HcR3M103Exsa", "artist": "Andreas Johnson", "title": "Sing for Me", "year": 2013, "url": "spotify:track:3y4D84anX7HcR3M103Exsa"}, {"id": "4rfdluaX6SBPLf2iPIiwuI", "artist": "Shirley Clamp", "title": "Min kärlek", "year": 2013, "url": "spotify:track:4rfdluaX6SBPLf2iPIiwuI"}, {"id": "1e5W8AnyjRnOuBYBu6kIOq", "artist": "Eriksson Glenmark", "title": "Upp över mina öron", "year": 2013, "url": "spotify:track:1e5W8AnyjRnOuBYBu6kIOq"}, {"id": "27ZAh5vb9NhtVwgwS376BL", "artist": "Sean Banan", "title": "Sean den förste Banan", "year": 2013, "url": "spotify:track:27ZAh5vb9NhtVwgwS376BL"}, {"id": "22tQ4tU4Ug5mfjZ4ZXQs63", "artist": "Robin Stjernberg", "title": "You", "year": 2013, "url": "spotify:track:22tQ4tU4Ug5mfjZ4ZXQs63"}, {"id": "1fFYDlaIkLnVENeH58vFfV", "artist": "Charlotte Perrelli", "title": "Tusen och en natt", "year": 2013, "url": "spotify:track:1fFYDlaIkLnVENeH58vFfV"}, {"id": "6oJw6tEHOwuVf5rgxbS5vX", "artist": "EMD", "title": "Baby Goodbye", "year": 2013, "url": "spotify:track:6oJw6tEHOwuVf5rgxbS5vX"}, {"id": "36H4loxZp7YtvnsIsPYgRZ", "artist": "Barbados", "title": "Världen utanför", "year": 2013, "url": "spotify:track:36H4loxZp7YtvnsIsPYgRZ"}, {"id": "3Kn3060radxke2eBQaTdvG", "artist": "Carola", "title": "Främling", "year": 2013, "url": "spotify:track:3Kn3060radxke2eBQaTdvG"}, {"id": "7GDPhaqvPaly5elGkL6kNr", "artist": "Brandsta City Släckers", "title": "Kom och ta mig", "year": 2013, "url": "spotify:track:7GDPhaqvPaly5elGkL6kNr"}, {"id": "5Cho1jR1aTDZaf7cLbOXHa", "artist": "BWO", "title": "Temple of Love - Radio Edit", "year": 2013, "url": "spotify:track:5Cho1jR1aTDZaf7cLbOXHa"}, {"id": "68u4EcZPZ6t3jHWSxCFReg", "artist": "Salem Al Fakir", "title": "Keep On Walking", "year": 2013, "url": "spotify:track:68u4EcZPZ6t3jHWSxCFReg"}, {"id": "21N3X50WEsuHmJFP9XRo81", "artist": "Roger Pontare", "title": "När vindarna viskar mitt namn", "year": 2013, "url": "spotify:track:21N3X50WEsuHmJFP9XRo81"}, {"id": "5RZy0lULDQlejayzVDaBHX", "artist": "David Lindgren", "title": "Skyline", "year": 2013, "url": "spotify:track:5RZy0lULDQlejayzVDaBHX"}, {"id": "6ilEtBUJ0Q79sYDa5v5r7x", "artist": "YOHIO", "title": "Heartbreak Hotel", "year": 2013, "url": "spotify:track:6ilEtBUJ0Q79sYDa5v5r7x"}, {"id": "58joME7Et6HgvcJVfctBn4", "artist": "Anton Ewald", "title": "Begging", "year": 2013, "url": "spotify:track:58joME7Et6HgvcJVfctBn4"}, {"id": "1KLBlWEg2wFHdic5Qu4BJH", "artist": "Sean Banan", "title": "Copacabanana", "year": 2013, "url": "spotify:track:1KLBlWEg2wFHdic5Qu4BJH"}, {"id": "6WLJN4KUywrk82RLcNFWnN", "artist": "Ravaillacz", "title": "En riktig jävla schlager", "year": 2013, "url": "spotify:track:6WLJN4KUywrk82RLcNFWnN"}, {"id": "0hhIQu0WDADRjjJbXldNA7", "artist": "Martin Rolinski", "title": "In And Out Of Love", "year": 2013, "url": "spotify:track:0hhIQu0WDADRjjJbXldNA7"}, {"id": "2iRHpQcrtOMAwjfKnyXuiA", "artist": "Behrang Miri", "title": "Jalla dansa sawa", "year": 2013, "url": "spotify:track:2iRHpQcrtOMAwjfKnyXuiA"}, {"id": "4sKhlGvVYBEH4UDxZxWM5k", "artist": "Anton Ewald", "title": "Begging", "year": 2013, "url": "spotify:track:4sKhlGvVYBEH4UDxZxWM5k"}, {"id": "0z3WY2xwK4sGLAO0CL27dA", "artist": "Ralf Gyllenhammar", "title": "Bed On Fire", "year": 2013, "url": "spotify:track:0z3WY2xwK4sGLAO0CL27dA"}, {"id": "4xS4BpLbiukdjR1nASZioW", "artist": "YOHIO", "title": "To The End", "year": 2014, "url": "spotify:track:4xS4BpLbiukdjR1nASZioW"}, {"id": "3AaWIOo4xB7EqNGzFeIqQr", "artist": "Outtrigger", "title": "Echo", "year": 2014, "url": "spotify:track:3AaWIOo4xB7EqNGzFeIqQr"}, {"id": "7stq16Zp5ALVzJUiuC6qub", "artist": "Ammotrack", "title": "Raise Your Hands", "year": 2014, "url": "spotify:track:7stq16Zp5ALVzJUiuC6qub"}, {"id": "3XhlY1x0LcIyHpZJB1g6WS", "artist": "Sanna Nielsen", "title": "Undo", "year": 2014, "url": "spotify:track:3XhlY1x0LcIyHpZJB1g6WS"}, {"id": "1zSXQIah3KQsjvo5sRNRq7", "artist": "Ace Wilder", "title": "Busy Doin' Nothin'", "year": 2014, "url": "spotify:track:1zSXQIah3KQsjvo5sRNRq7"}, {"id": "5VAFC56qr1oo0WiBbHzThc", "artist": "Helena Paparizou", "title": "Survivor", "year": 2014, "url": "spotify:track:5VAFC56qr1oo0WiBbHzThc"}, {"id": "0gKBozz5HvAvSvbUKdB74d", "artist": "Oscar Zia", "title": "Yes We Can", "year": 2014, "url": "spotify:track:0gKBozz5HvAvSvbUKdB74d"}, {"id": "2TXMualpK2mL7WNm61AzIo", "artist": "Little Great Things", "title": "Set Yourself Free", "year": 2014, "url": "spotify:track:2TXMualpK2mL7WNm61AzIo"}, {"id": "2dh07zmyCMoY64rQdJrXLe", "artist": "Panetoz", "title": "Efter solsken", "year": 2014, "url": "spotify:track:2dh07zmyCMoY64rQdJrXLe"}, {"id": "1bCrjqABEklwllefPAzWbZ", "artist": "Eric Saade", "title": "Sting", "year": 2015, "url": "spotify:track:1bCrjqABEklwllefPAzWbZ"}, {"id": "21BYhl07wWqGRQaj7sUxdV", "artist": "Måns Zelmerlöw", "title": "Heroes", "year": 2015, "url": "spotify:track:21BYhl07wWqGRQaj7sUxdV"}, {"id": "25hY5pktjQrV93IwvigiGV", "artist": "Andreas Weise", "title": "Bring out the Fire", "year": 2015, "url": "spotify:track:25hY5pktjQrV93IwvigiGV"}, {"id": "4IZy2nI5mAxLtlLPbcErqc", "artist": "Alcazar", "title": "Blame It On The Disco", "year": 2015, "url": "spotify:track:4IZy2nI5mAxLtlLPbcErqc"}, {"id": "5uYkCI6EcIKq4EGlah4NLu", "artist": "Magnus Carlsson", "title": "Möt mig i Gamla Stan", "year": 2015, "url": "spotify:track:5uYkCI6EcIKq4EGlah4NLu"}, {"id": "41beIKfxkQkFCEHowa7L3I", "artist": "Samir & Viktor", "title": "Bada nakna", "year": 2016, "url": "spotify:track:41beIKfxkQkFCEHowa7L3I"}, {"id": "3Zb17m6sfGsV4fY6JIx0Xz", "artist": "Mimi Werner", "title": "Ain't No Good", "year": 2016, "url": "spotify:track:3Zb17m6sfGsV4fY6JIx0Xz"}, {"id": "5x3gWXQoaFkItvHHU8iYEj", "artist": "Robin Bengtsson", "title": "Constellation Prize", "year": 2016, "url": "spotify:track:5x3gWXQoaFkItvHHU8iYEj"}, {"id": "4qyyWgZJ4GPuTHtC7WJykU", "artist": "Ace Wilder", "title": "Don't Worry", "year": 2016, "url": "spotify:track:4qyyWgZJ4GPuTHtC7WJykU"}, {"id": "7mVlcqPaMF3TMI0I6RRpbY", "artist": "Wiktoria", "title": "Save Me", "year": 2016, "url": "spotify:track:7mVlcqPaMF3TMI0I6RRpbY"}, {"id": "64eN486pUl5fauLVgjIRmz", "artist": "Boris René", "title": "Put Your Love on Me", "year": 2016, "url": "spotify:track:64eN486pUl5fauLVgjIRmz"}, {"id": "5UB29YRe8kIgIbrqYmXkfW", "artist": "Panetoz", "title": "Håll om mig hårt", "year": 2016, "url": "spotify:track:5UB29YRe8kIgIbrqYmXkfW"}, {"id": "5AQhraSIBzrWBIuiGpPl7v", "artist": "Oscar Zia", "title": "Human", "year": 2016, "url": "spotify:track:5AQhraSIBzrWBIuiGpPl7v"}, {"id": "2quKrwqzcvfD0RLcP2cVSq", "artist": "Dolly Style", "title": "Rollercoaster", "year": 2016, "url": "spotify:track:2quKrwqzcvfD0RLcP2cVSq"}, {"id": "5MCKZRICxIoeBaWDW44ADB", "artist": "Boris René", "title": "Her Kiss", "year": 2017, "url": "spotify:track:5MCKZRICxIoeBaWDW44ADB"}, {"id": "636kbgY2pgxJa3VirBxgA6", "artist": "De Vet Du", "title": "Road Trip", "year": 2017, "url": "spotify:track:636kbgY2pgxJa3VirBxgA6"}, {"id": "6IP1K1JuvGLv3sZzZx2KuD", "artist": "Ace Wilder", "title": "Wild Child", "year": 2017, "url": "spotify:track:6IP1K1JuvGLv3sZzZx2KuD"}, {"id": "08zv3l1PWHIbrOzYMr07XS", "artist": "Nano", "title": "Hold On - D&B Version", "year": 2017, "url": "spotify:track:08zv3l1PWHIbrOzYMr07XS"}, {"id": "11VWPPgzNJUJo2DRC3uJrF", "artist": "Dismissed", "title": "Hearts Align", "year": 2017, "url": "spotify:track:11VWPPgzNJUJo2DRC3uJrF"}, {"id": "5E9YgOF80ymsC8rNZ1zWpu", "artist": "Benjamin Ingrosso", "title": "Good Lovin'", "year": 2017, "url": "spotify:track:5E9YgOF80ymsC8rNZ1zWpu"}, {"id": "1zcRgN0wF9dWa7wdkqeR9b", "artist": "Robin Bengtsson", "title": "I Can't Go On", "year": 2017, "url": "spotify:track:1zcRgN0wF9dWa7wdkqeR9b"}, {"id": "7oEcFDfjrm50PbYsYRDOAW", "artist": "Owe Thörnqvist", "title": "Boogieman Blues", "year": 2017, "url": "spotify:track:7oEcFDfjrm50PbYsYRDOAW"}, {"id": "4g7AcG4s1L223pV13hkWuV", "artist": "Jon Henrik Fjällgren;Aninia", "title": "En värld full av strider (feat. Aninia)", "year": 2017, "url": "spotify:track:4g7AcG4s1L223pV13hkWuV"}, {"id": "3HK5RsVzqUbmOK1vIS9aJU", "artist": "Wiktoria", "title": "As I Lay Me Down", "year": 2017, "url": "spotify:track:3HK5RsVzqUbmOK1vIS9aJU"}, {"id": "78ylCWWwOT1OqDcdnHUXXb", "artist": "Axel Schylström", "title": "När ingen ser", "year": 2017, "url": "spotify:track:78ylCWWwOT1OqDcdnHUXXb"}, {"id": "1bf2zb381DqDczVBCv18Cz", "artist": "Loreen", "title": "Statements", "year": 2017, "url": "spotify:track:1bf2zb381DqDczVBCv18Cz"}, {"id": "5IhyzR6vzXqQzb3vNXv5OY", "artist": "Edward Blom", "title": "Livet på en pinne", "year": 2018, "url": "spotify:track:5IhyzR6vzXqQzb3vNXv5OY"}, {"id": "4hCuE7sLvPBRHXFQar1dgm", "artist": "LIAMOO", "title": "Last Breath", "year": 2018, "url": "spotify:track:4hCuE7sLvPBRHXFQar1dgm"}, {"id": "2zJJro5CPAVwwzLQQdcBbu", "artist": "Mendez", "title": "Everyday", "year": 2018, "url": "spotify:track:2zJJro5CPAVwwzLQQdcBbu"}, {"id": "6TyfnfgxUWYF6ytHr3Y4TZ", "artist": "Samir & Viktor", "title": "Shuffla", "year": 2018, "url": "spotify:track:6TyfnfgxUWYF6ytHr3Y4TZ"}, {"id": "686hK88GtwAr6LNCDpnSL9", "artist": "Martin Almgren", "title": "A Bitter Lullaby", "year": 2018, "url": "spotify:track:686hK88GtwAr6LNCDpnSL9"}, {"id": "7lnLUecrXWPbAFjPU5eCZE", "artist": "Benjamin Ingrosso", "title": "Dance You Off", "year": 2018, "url": "spotify:track:7lnLUecrXWPbAFjPU5eCZE"}, {"id": "3awvm252RhYY8UJtM9svjY", "artist": "Rolandz", "title": "Fuldans", "year": 2018, "url": "spotify:track:3awvm252RhYY8UJtM9svjY"}, {"id": "5faSzPLmJYUOnk17yFRlIe", "artist": "John Lundvik", "title": "My Turn", "year": 2018, "url": "spotify:track:5faSzPLmJYUOnk17yFRlIe"}, {"id": "2JLp01p1NG7wg0vNqNpOC1", "artist": "Zeana;Anis Don Demina", "title": "Mina bränder (feat. Anis Don Demina)", "year": 2019, "url": "spotify:track:2JLp01p1NG7wg0vNqNpOC1"}, {"id": "0yeg0NZmcZu6y6G9sdJliL", "artist": "Margaret", "title": "Tempo", "year": 2019, "url": "spotify:track:0yeg0NZmcZu6y6G9sdJliL"}, {"id": "4VQ28qPi35wWZdQTNMQ8yf", "artist": "Oscar Enestad", "title": "I Love It", "year": 2019, "url": "spotify:track:4VQ28qPi35wWZdQTNMQ8yf"}, {"id": "7BmOjtb7S6XzIJUJL5l7FR", "artist": "High15", "title": "No Drama", "year": 2019, "url": "spotify:track:7BmOjtb7S6XzIJUJL5l7FR"}, {"id": "6OuNBhcrkULqFZDfLZWLqk", "artist": "Omar Rudberg", "title": "Om om och om igen", "year": 2019, "url": "spotify:track:6OuNBhcrkULqFZDfLZWLqk"}, {"id": "2iEvhos1CqeU0vurqLCWaZ", "artist": "Dolly Style", "title": "Habibi", "year": 2019, "url": "spotify:track:2iEvhos1CqeU0vurqLCWaZ"}, {"id": "4s2QheDmwez4q3AhCyaGWc", "artist": "Mohombi", "title": "Hello", "year": 2019, "url": "spotify:track:4s2QheDmwez4q3AhCyaGWc"}, {"id": "7muE2TWLiWW9OutrrhOQ87", "artist": "Lisa Ajax", "title": "Torn", "year": 2019, "url": "spotify:track:7muE2TWLiWW9OutrrhOQ87"}, {"id": "0qJIETfXKVqyaWTyD5zog3", "artist": "Bishara", "title": "On My Own", "year": 2019, "url": "spotify:track:0qJIETfXKVqyaWTyD5zog3"}, {"id": "3dlu81sbakUxdtEHFnTJmz", "artist": "Malou Prytz", "title": "I Do Me", "year": 2019, "url": "spotify:track:3dlu81sbakUxdtEHFnTJmz"}, {"id": "6Jf8Y84YSdqeJfEPDJFEZu", "artist": "John Lundvik", "title": "Too Late For Love", "year": 2019, "url": "spotify:track:6Jf8Y84YSdqeJfEPDJFEZu"}, {"id": "4MmdyMZcPEk4Ypv2qcKM3I", "artist": "Wiktoria", "title": "Not With Me", "year": 2019, "url": "spotify:track:4MmdyMZcPEk4Ypv2qcKM3I"}, {"id": "2RNvjHLcUl1ft5v5szLP5U", "artist": "Arvingarna", "title": "I Do", "year": 2019, "url": "spotify:track:2RNvjHLcUl1ft5v5szLP5U"}, {"id": "29nVYH6dQnFfGPVmYCvAhM", "artist": "Lina Hedlund", "title": "Victorious", "year": 2019, "url": "spotify:track:29nVYH6dQnFfGPVmYCvAhM"}, {"id": "3RDZ1tmyih1KHQMj6gpgD4", "artist": "Paul Rey", "title": "Talking In My Sleep", "year": 2020, "url": "spotify:track:3RDZ1tmyih1KHQMj6gpgD4"}, {"id": "22K6G9TGc7uYaAao3h6IHA", "artist": "Felix Sandman", "title": "BOYS WITH EMOTIONS", "year": 2020, "url": "spotify:track:22K6G9TGc7uYaAao3h6IHA"}, {"id": "60Qib6jBxNJGCxVk8mJeRI", "artist": "Mendez;Alvaro Estrella", "title": "Vamos Amigos", "year": 2020, "url": "spotify:track:60Qib6jBxNJGCxVk8mJeRI"}, {"id": "20052FYa2SF5Lkp9VZTLJX", "artist": "Anis Don Demina", "title": "Vem e som oss", "year": 2020, "url": "spotify:track:20052FYa2SF5Lkp9VZTLJX"}, {"id": "19LiotxKSVs7FeVMEdHz63", "artist": "The Mamas", "title": "Move", "year": 2020, "url": "spotify:track:19LiotxKSVs7FeVMEdHz63"}, {"id": "4RcEx6TvICENelSh3O7gvu", "artist": "Dotter", "title": "Bulletproof", "year": 2020, "url": "spotify:track:4RcEx6TvICENelSh3O7gvu"}, {"id": "0ZoxdGmVIGzxUSi6nkQ98G", "artist": "Anna Bergendahl", "title": "Kingdom Come", "year": 2020, "url": "spotify:track:0ZoxdGmVIGzxUSi6nkQ98G"}, {"id": "7oNRF4LJHL5aC2zTU66UN1", "artist": "Hanna Ferm", "title": "Brave", "year": 2020, "url": "spotify:track:7oNRF4LJHL5aC2zTU66UN1"}, {"id": "6CwMiys6WuWB8bYOMZUxDZ", "artist": "Kadiatou", "title": "One Touch", "year": 2021, "url": "spotify:track:6CwMiys6WuWB8bYOMZUxDZ"}, {"id": "59NNeUlyh2AmaU8Az19zax", "artist": "Patrik Jean", "title": "Tears Run Dry", "year": 2021, "url": "spotify:track:59NNeUlyh2AmaU8Az19zax"}, {"id": "6O27WBEqkGeyq3hNYE0BdS", "artist": "WAHL;SAMI", "title": "90-talet", "year": 2021, "url": "spotify:track:6O27WBEqkGeyq3hNYE0BdS"}, {"id": "6McgJF06bnEyIVAfRTaZ4W", "artist": "Anton Ewald", "title": "New Religion", "year": 2021, "url": "spotify:track:6McgJF06bnEyIVAfRTaZ4W"}, {"id": "7t3VznmzfrDXFyexb2wA0q", "artist": "Eric Saade", "title": "Every Minute", "year": 2021, "url": "spotify:track:7t3VznmzfrDXFyexb2wA0q"}, {"id": "41iZhFesLQ6JLjyPxI4LLL", "artist": "Danny Saucedo", "title": "Dandi dansa", "year": 2021, "url": "spotify:track:41iZhFesLQ6JLjyPxI4LLL"}, {"id": "1nP79zXOucRp8lBoT52U5M", "artist": "Paul Rey", "title": "The Missing Piece", "year": 2021, "url": "spotify:track:1nP79zXOucRp8lBoT52U5M"}, {"id": "5zxZ7M4RgWZUHlMEwac8vt", "artist": "Tusse", "title": "Voices", "year": 2021, "url": "spotify:track:5zxZ7M4RgWZUHlMEwac8vt"}, {"id": "6k4e5H3MbDzhEX3qJSWwpd", "artist": "Klara Hammarström", "title": "Run To The Hills", "year": 2022, "url": "spotify:track:6k4e5H3MbDzhEX3qJSWwpd"}, {"id": "0tmMGxsxRd78NJGrMesWtx", "artist": "Tone Sekelius", "title": "My Way", "year": 2022, "url": "spotify:track:0tmMGxsxRd78NJGrMesWtx"}, {"id": "52DKkQDdw0VjvoHbIDkLmF", "artist": "Malou Prytz", "title": "Bananas", "year": 2022, "url": "spotify:track:52DKkQDdw0VjvoHbIDkLmF"}, {"id": "2Cyow8nZDqP9tolduIf2KX", "artist": "LIAMOO", "title": "Bluffin", "year": 2022, "url": "spotify:track:2Cyow8nZDqP9tolduIf2KX"}, {"id": "5DYCuzBPf13q0QZwQvjYzi", "artist": "Smash Into Pieces", "title": "Six Feet Under", "year": 2023, "url": "spotify:track:5DYCuzBPf13q0QZwQvjYzi"}, {"id": "1DmW5Ep6ywYwxc2HMT5BG6", "artist": "Loreen", "title": "Tattoo", "year": 2023, "url": "spotify:track:1DmW5Ep6ywYwxc2HMT5BG6"}, {"id": "710xi8haZ3Os0wip67GcmY", "artist": "Panetoz", "title": "On My Way", "year": 2023, "url": "spotify:track:710xi8haZ3Os0wip67GcmY"}, {"id": "48NRejAH4xS4PNTl3465O5", "artist": "Tone Sekelius", "title": "Rhythm Of My Show", "year": 2023, "url": "spotify:track:48NRejAH4xS4PNTl3465O5"}, {"id": "4lGrF9Fk8wJ6nLgcuRdFre", "artist": "Nordman", "title": "Släpp alla sorger", "year": 2023, "url": "spotify:track:4lGrF9Fk8wJ6nLgcuRdFre"}, {"id": "7DBQIEXuFIXMWNAWyGsTTm", "artist": "Marcus & Martinus", "title": "Air", "year": 2023, "url": "spotify:track:7DBQIEXuFIXMWNAWyGsTTm"}, {"id": "5877bQq4QOaIYvwo9LtmVB", "artist": "Lia Larsson", "title": "30 KM/H", "year": 2024, "url": "spotify:track:5877bQq4QOaIYvwo9LtmVB"}, {"id": "2ArX0SzCSHXytmAg36BIev", "artist": "FRÖKEN SNUSK", "title": "UNGA & FRIA", "year": 2024, "url": "spotify:track:2ArX0SzCSHXytmAg36BIev"}, {"id": "0QOEWQEowuJUz7LRIe3F6b", "artist": "Smash Into Pieces", "title": "Heroes Are Calling", "year": 2024, "url": "spotify:track:0QOEWQEowuJUz7LRIe3F6b"}, {"id": "5L8C1PZGCpZf8STcN79H5j", "artist": "Marcus & Martinus", "title": "Unforgettable", "year": 2024, "url": "spotify:track:5L8C1PZGCpZf8STcN79H5j"}, {"id": "4kqkGUxHHAqJMtpsHMvLTQ", "artist": "Medina", "title": "Que Sera", "year": 2024, "url": "spotify:track:4kqkGUxHHAqJMtpsHMvLTQ"}, {"id": "6mY5yB7qMSnGoYphuRqJ1I", "artist": "Cazzi Opeia", "title": "Give My Heart A Break", "year": 2024, "url": "spotify:track:6mY5yB7qMSnGoYphuRqJ1I"}, {"id": "3A2aodIVpYnYwCbzmZVxl3", "artist": "Maria Sur", "title": "When I'm Gone", "year": 2024, "url": "spotify:track:3A2aodIVpYnYwCbzmZVxl3"}, {"id": "0SGMCZngLMlB3w34r0cmaz", "artist": "SCARLET", "title": "Circus X", "year": 2024, "url": "spotify:track:0SGMCZngLMlB3w34r0cmaz"}, {"id": "4uXocNcZx96XkuaqfE43HD", "artist": "Elecktra", "title": "Banne Maj", "year": 2024, "url": "spotify:track:4uXocNcZx96XkuaqfE43HD"}, {"id": "6H19ohMkGqD9PmcUUa0MdF", "artist": "Annika Wickihalder", "title": "Light", "year": 2024, "url": "spotify:track:6H19ohMkGqD9PmcUUa0MdF"}, {"id": "6CshHyQHSzQhwaadpBQhH1", "artist": "Greczula", "title": "Believe me", "year": 2025, "url": "spotify:track:6CshHyQHSzQhwaadpBQhH1"}, {"id": "7aLXAoR6RB5qQmBRvKE2kO", "artist": "Klara Hammarström", "title": "On and On and On", "year": 2025, "url": "spotify:track:7aLXAoR6RB5qQmBRvKE2kO"}, {"id": "5fZNxL6KhetncbmSaVZrwg", "artist": "Andreas Lundstedt", "title": "Vicious", "year": 2025, "url": "spotify:track:5fZNxL6KhetncbmSaVZrwg"}, {"id": "2CMLgiwaTlemYqc7llxO6i", "artist": "Dolly Style", "title": "Yihaa", "year": 2025, "url": "spotify:track:2CMLgiwaTlemYqc7llxO6i"}, {"id": "4E0st5Y809Aro5GG7oEzas", "artist": "John Lundvik", "title": "Voice Of The Silent", "year": 2025, "url": "spotify:track:4E0st5Y809Aro5GG7oEzas"}, {"id": "0UvVr7by4E5QEndoWl1Joo", "artist": "SCARLET", "title": "Sweet N’ Psycho", "year": 2025, "url": "spotify:track:0UvVr7by4E5QEndoWl1Joo"}, {"id": "1xYhFfJInHS8hsGfrJW4lI", "artist": "Måns Zelmerlöw", "title": "Revolution", "year": 2025, "url": "spotify:track:1xYhFfJInHS8hsGfrJW4lI"}, {"id": "3zqr8gsLOdlRehxOD3pZpe", "artist": "Saga Ludvigsson", "title": "Hate You So Much", "year": 2025, "url": "spotify:track:3zqr8gsLOdlRehxOD3pZpe"}, {"id": "3kzhtJH4jrnKQmuE8ai8ob", "artist": "Meira Omar", "title": "Hush Hush", "year": 2025, "url": "spotify:track:3kzhtJH4jrnKQmuE8ai8ob"}, {"id": "2gThkoApt6B7ajBWZRLAVv", "artist": "KAJ", "title": "Bara Bada Bastu", "year": 2025, "url": "spotify:track:2gThkoApt6B7ajBWZRLAVv"}, {"id": "3uLYynLG6MmlfSVfzVCYW2", "artist": "Erik Segerstedt", "title": "Show Me What Love Is", "year": 2025, "url": "spotify:track:3uLYynLG6MmlfSVfzVCYW2"}, {"id": "0RxBz475eVWbDQQwcY7DNa", "artist": "noll2", "title": "Berusade ord", "year": 2026, "url": "spotify:track:0RxBz475eVWbDQQwcY7DNa"}, {"id": "3AfX2EhXub2DqgqJABSIXL", "artist": "FELICIA", "title": "My System", "year": 2026, "url": "spotify:track:3AfX2EhXub2DqgqJABSIXL"}, {"id": "1IEgoHovZYbhwpk9LiTK9Z", "artist": "Meira Omar", "title": "Dooset Daram", "year": 2026, "url": "spotify:track:1IEgoHovZYbhwpk9LiTK9Z"}, {"id": "1Dit5cKN2ktAceRIsSIwdk", "artist": "AleXa", "title": "Tongue Tied", "year": 2026, "url": "spotify:track:1Dit5cKN2ktAceRIsSIwdk"}, {"id": "2TFtcHGIGIvMOmyZgDoKR0", "artist": "Jacqline", "title": "Woman", "year": 2026, "url": "spotify:track:2TFtcHGIGIvMOmyZgDoKR0"}]);
+addPlaylist('wikstrand','Rewind-listan · 1965–2026',[{"id": "3AhXZa8sUQht0UEdBJgpGc", "artist": "Bob Dylan", "title": "Like a Rolling Stone", "year": 1965, "url": "spotify:track:3AhXZa8sUQht0UEdBJgpGc"}, {"id": "2EqlS6tkEnglzr7tkKAAYD", "artist": "The Beatles", "title": "Come Together - Remastered 2009", "year": 1969, "url": "spotify:track:2EqlS6tkEnglzr7tkKAAYD"}, {"id": "6dGnYIeXmHdcikdzNNDMm2", "artist": "The Beatles", "title": "Here Comes The Sun - Remastered 2009", "year": 1969, "url": "spotify:track:6dGnYIeXmHdcikdzNNDMm2"}, {"id": "38llcrfX1arUqrEe0DRRzW", "artist": "Jim Croce", "title": "I Got a Name - Stereo Version", "year": 1973, "url": "spotify:track:38llcrfX1arUqrEe0DRRzW"}, {"id": "4u7EnebtmKWzUH433cf5Qv", "artist": "Queen", "title": "Bohemian Rhapsody - Remastered 2011", "year": 1975, "url": "spotify:track:4u7EnebtmKWzUH433cf5Qv"}, {"id": "0GjEhVFGZW8afUYGChu3Rr", "artist": "ABBA", "title": "Dancing Queen", "year": 1976, "url": "spotify:track:0GjEhVFGZW8afUYGChu3Rr"}, {"id": "40riOy7x9W7GXjyGp4pjAv", "artist": "Eagles", "title": "Hotel California - 2013 Remaster", "year": 1976, "url": "spotify:track:40riOy7x9W7GXjyGp4pjAv"}, {"id": "0qRR9d89hIS0MHRkQ0ejxX", "artist": "Daryl Hall & John Oates", "title": "Rich Girl", "year": 1976, "url": "spotify:track:0qRR9d89hIS0MHRkQ0ejxX"}, {"id": "0ofHAoxe9vBkTCp2UQIavz", "artist": "Fleetwood Mac", "title": "Dreams - 2004 Remaster", "year": 1977, "url": "spotify:track:0ofHAoxe9vBkTCp2UQIavz"}, {"id": "3kXoKlD84c6OmIcOLfrfEs", "artist": "Earth, Wind & Fire", "title": "September", "year": 1978, "url": "spotify:track:3kXoKlD84c6OmIcOLfrfEs"}, {"id": "37Tmv4NnfQeb0ZgUC4fOJj", "artist": "Dire Straits", "title": "Sultans Of Swing", "year": 1978, "url": "spotify:track:37Tmv4NnfQeb0ZgUC4fOJj"}, {"id": "2zYzyRzz6pRmhPzyfMEC8s", "artist": "AC/DC", "title": "Highway to Hell", "year": 1979, "url": "spotify:track:2zYzyRzz6pRmhPzyfMEC8s"}, {"id": "07q0QVgO56EorrSGHC48y3", "artist": "KISS", "title": "I Was Made For Lovin' You", "year": 1979, "url": "spotify:track:07q0QVgO56EorrSGHC48y3"}, {"id": "5vdp5UmvTsnMEMESIF2Ym7", "artist": "Queen", "title": "Another One Bites The Dust - Remastered 2011", "year": 1980, "url": "spotify:track:5vdp5UmvTsnMEMESIF2Ym7"}, {"id": "69QHm3pustz01CJRwdo20z", "artist": "AC/DC", "title": "Hells Bells", "year": 1980, "url": "spotify:track:69QHm3pustz01CJRwdo20z"}, {"id": "0OG78XRT8APWy1PWh4QBeH", "artist": "Gasolin'", "title": "Hva' Gør Vi Nu, Lille Du?", "year": 1980, "url": "spotify:track:0OG78XRT8APWy1PWh4QBeH"}, {"id": "5RKQ5NdjSh2QzD4MaunT91", "artist": "Journey", "title": "Don't Stop Believin' (2022 Remaster)", "year": 1981, "url": "spotify:track:5RKQ5NdjSh2QzD4MaunT91"}, {"id": "7J1uxwnxfQLu4APicE5Rnj", "artist": "Michael Jackson", "title": "Billie Jean", "year": 1982, "url": "spotify:track:7J1uxwnxfQLu4APicE5Rnj"}, {"id": "4GNilkZKILsug3l5pdLoxo", "artist": "Yazoo", "title": "Only You", "year": 1982, "url": "spotify:track:4GNilkZKILsug3l5pdLoxo"}, {"id": "1EXrFPfVNVsyb32yapebbM", "artist": "Madness", "title": "Our House", "year": 1982, "url": "spotify:track:1EXrFPfVNVsyb32yapebbM"}, {"id": "0pjjh1qWnHUSZ2hRDxI5AR", "artist": "Gyllene Tider", "title": "Flickan i en Cole Porter-sång", "year": 1982, "url": "spotify:track:0pjjh1qWnHUSZ2hRDxI5AR"}, {"id": "4TnUKixNWMfajncgdSwFoi", "artist": "George Strait", "title": "Amarillo By Morning", "year": 1982, "url": "spotify:track:4TnUKixNWMfajncgdSwFoi"}, {"id": "1JSTJqkT5qHq8MDJnJbRE1", "artist": "The Police", "title": "Every Breath You Take", "year": 1983, "url": "spotify:track:1JSTJqkT5qHq8MDJnJbRE1"}, {"id": "3XDeeP9wBZzGhIPZmLfEEx", "artist": "Culture Club", "title": "Karma Chameleon", "year": 1983, "url": "spotify:track:3XDeeP9wBZzGhIPZmLfEEx"}, {"id": "3vV3cr2TpPqFk07zxYUbla", "artist": "Quiet Riot", "title": "Cum on Feel the Noize", "year": 1983, "url": "spotify:track:3vV3cr2TpPqFk07zxYUbla"}, {"id": "2RWFncSWZEhSRRifqiDNVV", "artist": "Bryan Adams", "title": "Run To You", "year": 1984, "url": "spotify:track:2RWFncSWZEhSRRifqiDNVV"}, {"id": "2YiCMmONQcoMPX2bV1LxE0", "artist": "Tears For Fears", "title": "Everybody Wants To Rule The World", "year": 1985, "url": "spotify:track:2YiCMmONQcoMPX2bV1LxE0"}, {"id": "0ee1DiZF94NSqqpG0XHUzH", "artist": "Bon Jovi", "title": "Livin' On A Prayer", "year": 1986, "url": "spotify:track:0ee1DiZF94NSqqpG0XHUzH"}, {"id": "5zWZ9iNevP0397xB3jWV2z", "artist": "Modern Talking", "title": "Brother Louie", "year": 1986, "url": "spotify:track:5zWZ9iNevP0397xB3jWV2z"}, {"id": "0rmGAIH9LNJewFw7nKzZnc", "artist": "Bon Jovi", "title": "You Give Love A Bad Name", "year": 1986, "url": "spotify:track:0rmGAIH9LNJewFw7nKzZnc"}, {"id": "3MrRksHupTVEQ7YbA0FsZK", "artist": "Europe", "title": "The Final Countdown", "year": 1986, "url": "spotify:track:3MrRksHupTVEQ7YbA0FsZK"}, {"id": "56GbZVwxMdf1DENCluYS8A", "artist": "Crowded House", "title": "Don't Dream It's Over", "year": 1986, "url": "spotify:track:56GbZVwxMdf1DENCluYS8A"}, {"id": "6qJXG5jwbRAo8RcS724Oba", "artist": "Stefan Borsch", "title": "Inga blommor växer på en sjömans grav", "year": 1986, "url": "spotify:track:6qJXG5jwbRAo8RcS724Oba"}, {"id": "6eN1f9KNmiWEhpE2RhQqB5", "artist": "Guns N' Roses", "title": "Paradise City", "year": 1987, "url": "spotify:track:6eN1f9KNmiWEhpE2RhQqB5"}, {"id": "5JGEAz15LkPoOtFHttDtVs", "artist": "U2", "title": "With Or Without You - Remastered 2007", "year": 1987, "url": "spotify:track:5JGEAz15LkPoOtFHttDtVs"}, {"id": "7snQQk1zcKl8gZ92AnueZW", "artist": "Guns N' Roses", "title": "Sweet Child O' Mine", "year": 1987, "url": "spotify:track:7snQQk1zcKl8gZ92AnueZW"}, {"id": "2M9ro2krNb7nr7HSprkEgo", "artist": "Tracy Chapman", "title": "Fast Car", "year": 1988, "url": "spotify:track:2M9ro2krNb7nr7HSprkEgo"}, {"id": "4d6eqRtpDX7tydHJGDZUBQ", "artist": "Fine Young Cannibals", "title": "She Drives Me Crazy", "year": 1988, "url": "spotify:track:4d6eqRtpDX7tydHJGDZUBQ"}, {"id": "3Cx4yrFaX8CeHwBMReOWXI", "artist": "Billy Joel", "title": "We Didn't Start the Fire", "year": 1989, "url": "spotify:track:3Cx4yrFaX8CeHwBMReOWXI"}, {"id": "1YnVYHXoak0syv4xBRHQRb", "artist": "UB40", "title": "Kingston Town", "year": 1989, "url": "spotify:track:1YnVYHXoak0syv4xBRHQRb"}, {"id": "57bgtoPSgt236HzfBOd8kj", "artist": "AC/DC", "title": "Thunderstruck", "year": 1990, "url": "spotify:track:57bgtoPSgt236HzfBOd8kj"}, {"id": "3d9DChrdc6BOeFsbrZ3Is0", "artist": "Red Hot Chili Peppers", "title": "Under the Bridge", "year": 1991, "url": "spotify:track:3d9DChrdc6BOeFsbrZ3Is0"}, {"id": "3YRCqOhFifThpSRFJ1VWFM", "artist": "Guns N' Roses", "title": "November Rain", "year": 1991, "url": "spotify:track:3YRCqOhFifThpSRFJ1VWFM"}, {"id": "4CeeEOM32jQcH3eN9Q2dGj", "artist": "Nirvana", "title": "Smells Like Teen Spirit", "year": 1991, "url": "spotify:track:4CeeEOM32jQcH3eN9Q2dGj"}, {"id": "70LcF31zb1H0PyJoS1Sx1r", "artist": "Radiohead", "title": "Creep", "year": 1993, "url": "spotify:track:70LcF31zb1H0PyJoS1Sx1r"}, {"id": "5adjc9rGazKvYcyEHNtoz1", "artist": "Oasis", "title": "Cigarettes & Alcohol - Remastered", "year": 1994, "url": "spotify:track:5adjc9rGazKvYcyEHNtoz1"}, {"id": "6L89mwZXSOwYl76YXfX13s", "artist": "Green Day", "title": "Basket Case", "year": 1994, "url": "spotify:track:6L89mwZXSOwYl76YXfX13s"}, {"id": "3gjHnylel3PTRpjS44ocqr", "artist": "The Cranberries", "title": "Zombie - 2025 Remastered", "year": 1994, "url": "spotify:track:3gjHnylel3PTRpjS44ocqr"}, {"id": "0PCGfA36HrVPmsBZJ57zOU", "artist": "Wet Wet Wet", "title": "Love Is All Around - From \"Four Weddings And A Funeral\"", "year": 1995, "url": "spotify:track:0PCGfA36HrVPmsBZJ57zOU"}, {"id": "7ygpwy2qP3NbrxVkHvUhXY", "artist": "Oasis", "title": "Wonderwall - Remastered", "year": 1995, "url": "spotify:track:7ygpwy2qP3NbrxVkHvUhXY"}, {"id": "12dU3vAh6AFoJkisorfoUl", "artist": "Oasis", "title": "Don't Look Back In Anger - Remastered", "year": 1995, "url": "spotify:track:12dU3vAh6AFoJkisorfoUl"}, {"id": "2A7GGXmTlXuH9LOvBXgOX4", "artist": "Oasis", "title": "Champagne Supernova - Remastered", "year": 1995, "url": "spotify:track:2A7GGXmTlXuH9LOvBXgOX4"}, {"id": "7aQjPecQdIuNd1sz3KCDhD", "artist": "The Cardigans", "title": "Lovefool", "year": 1996, "url": "spotify:track:7aQjPecQdIuNd1sz3KCDhD"}, {"id": "57iDDD9N9tTWe75x6qhStw", "artist": "The Verve", "title": "Bitter Sweet Symphony - Remastered 2016", "year": 1997, "url": "spotify:track:57iDDD9N9tTWe75x6qhStw"}, {"id": "5YScXJKtefsgdskIy60N7A", "artist": "Chumbawamba", "title": "Tubthumping", "year": 1997, "url": "spotify:track:5YScXJKtefsgdskIy60N7A"}, {"id": "4INDiWSKvqSKDEu7mh8HFz", "artist": "The Notorious B.I.G.;Mase;Diddy", "title": "Mo Money Mo Problems (feat. Puff Daddy & Mase) - 2014 Remaster", "year": 1997, "url": "spotify:track:4INDiWSKvqSKDEu7mh8HFz"}, {"id": "4EchqUKQ3qAQuRNKmeIpnf", "artist": "The Offspring", "title": "The Kids Aren't Alright", "year": 1998, "url": "spotify:track:4EchqUKQ3qAQuRNKmeIpnf"}, {"id": "0Ui05Ov0s4PnRc4JI3Pilg", "artist": "The Cardigans", "title": "My Favourite Game", "year": 1998, "url": "spotify:track:0Ui05Ov0s4PnRc4JI3Pilg"}, {"id": "6Qyc6fS4DsZjB2mRW9DsQs", "artist": "The Goo Goo Dolls", "title": "Iris", "year": 1998, "url": "spotify:track:6Qyc6fS4DsZjB2mRW9DsQs"}, {"id": "25FTMokYEbEWHEdss5JLZS", "artist": "Wheatus", "title": "Teenage Dirtbag", "year": 1999, "url": "spotify:track:25FTMokYEbEWHEdss5JLZS"}, {"id": "0CUEc6T65lrU6rVW3HVYsl", "artist": "Kool & The Gang", "title": "Celebration - Single Version", "year": 1999, "url": "spotify:track:0CUEc6T65lrU6rVW3HVYsl"}, {"id": "503OTo2dSqe7qk76rgsbep", "artist": "Dr. Dre;Snoop Dogg", "title": "Still D.R.E.", "year": 1999, "url": "spotify:track:503OTo2dSqe7qk76rgsbep"}, {"id": "47BBI51FKFwOMlIiX6m8ya", "artist": "Backstreet Boys", "title": "I Want It That Way", "year": 1999, "url": "spotify:track:47BBI51FKFwOMlIiX6m8ya"}, {"id": "1KGi9sZVMeszgZOWivFpxs", "artist": "TLC", "title": "No Scrubs", "year": 1999, "url": "spotify:track:1KGi9sZVMeszgZOWivFpxs"}, {"id": "3Fzlg5r1IjhLk2qRw667od", "artist": "Toploader", "title": "Dancing in the Moonlight", "year": 2000, "url": "spotify:track:3Fzlg5r1IjhLk2qRw667od"}, {"id": "0I3q5fE6wg7LIfHGngUTnV", "artist": "Outkast", "title": "Ms. Jackson", "year": 2000, "url": "spotify:track:0I3q5fE6wg7LIfHGngUTnV"}, {"id": "60a0Rd6pjrkxjPbaKzXjfq", "artist": "Linkin Park", "title": "In the End", "year": 2000, "url": "spotify:track:60a0Rd6pjrkxjPbaKzXjfq"}, {"id": "0BCPKOYdS2jbQ8iyB56Zns", "artist": "Coldplay", "title": "Clocks", "year": 2002, "url": "spotify:track:0BCPKOYdS2jbQ8iyB56Zns"}, {"id": "7lQ8MOhq6IN2w8EYcFNSUk", "artist": "Eminem", "title": "Without Me", "year": 2002, "url": "spotify:track:7lQ8MOhq6IN2w8EYcFNSUk"}, {"id": "6ECp64rv50XVz93WvxXMGF", "artist": "Maroon 5", "title": "This Love", "year": 2002, "url": "spotify:track:6ECp64rv50XVz93WvxXMGF"}, {"id": "2PpruBYCo4H7WOBJ7Q2EwM", "artist": "Outkast", "title": "Hey Ya!", "year": 2003, "url": "spotify:track:2PpruBYCo4H7WOBJ7Q2EwM"}, {"id": "305WCRhhS10XUcH6AEwZk6", "artist": "Jet", "title": "Are You Gonna Be My Girl", "year": 2003, "url": "spotify:track:305WCRhhS10XUcH6AEwZk6"}, {"id": "2nLtzopw4rPReszdYBJU6h", "artist": "Linkin Park", "title": "Numb", "year": 2003, "url": "spotify:track:2nLtzopw4rPReszdYBJU6h"}, {"id": "7iL6o9tox1zgHpKUfh9vuC", "artist": "50 Cent", "title": "In Da Club", "year": 2003, "url": "spotify:track:7iL6o9tox1zgHpKUfh9vuC"}, {"id": "3AszgPDZd9q0DpDFt4HFBy", "artist": "Outkast", "title": "Hey Ya!", "year": 2003, "url": "spotify:track:3AszgPDZd9q0DpDFt4HFBy"}, {"id": "3dPQuX8Gs42Y7b454ybpMR", "artist": "The White Stripes", "title": "Seven Nation Army", "year": 2003, "url": "spotify:track:3dPQuX8Gs42Y7b454ybpMR"}, {"id": "6ft9PAgNOjmZ2kFVP7LGqb", "artist": "Frankie Valli", "title": "Can't Take My Eyes off You", "year": 2003, "url": "spotify:track:6ft9PAgNOjmZ2kFVP7LGqb"}, {"id": "0JDp7p99FSja52T0YBLupR", "artist": "Timbuktu", "title": "The botten is nådd", "year": 2003, "url": "spotify:track:0JDp7p99FSja52T0YBLupR"}, {"id": "003vvx7Niy0yvhvHt4a68B", "artist": "The Killers", "title": "Mr. Brightside", "year": 2004, "url": "spotify:track:003vvx7Niy0yvhvHt4a68B"}, {"id": "1SKPmfSYaPsETbRHaiA18G", "artist": "Keane", "title": "Somewhere Only We Know", "year": 2004, "url": "spotify:track:1SKPmfSYaPsETbRHaiA18G"}, {"id": "0d28khcov6AiegSCpG5TuT", "artist": "Gorillaz;De La Soul", "title": "Feel Good Inc.", "year": 2005, "url": "spotify:track:0d28khcov6AiegSCpG5TuT"}, {"id": "3d0WouFnFmr0K3kjeza3fF", "artist": "Shakira;Wyclef Jean", "title": "Hips Don't Lie (feat. Wyclef Jean)", "year": 2005, "url": "spotify:track:3d0WouFnFmr0K3kjeza3fF"}, {"id": "4dyx5SzxPPaD8xQIid5Wjj", "artist": "Peter Bjorn and John", "title": "Young Folks", "year": 2006, "url": "spotify:track:4dyx5SzxPPaD8xQIid5Wjj"}, {"id": "2aibwv5hGXSgw7Yru8IYTO", "artist": "Red Hot Chili Peppers", "title": "Snow (Hey Oh)", "year": 2006, "url": "spotify:track:2aibwv5hGXSgw7Yru8IYTO"}, {"id": "1jJci4qxiYcOHhQR247rEU", "artist": "MGMT", "title": "Kids", "year": 2007, "url": "spotify:track:1jJci4qxiYcOHhQR247rEU"}, {"id": "5r5cp9IpziiIsR6b93vcnQ", "artist": "Empire Of The Sun", "title": "Walking On A Dream", "year": 2008, "url": "spotify:track:5r5cp9IpziiIsR6b93vcnQ"}, {"id": "0ntQJM78wzOLVeCUAW7Y45", "artist": "Kings of Leon", "title": "Sex on Fire", "year": 2008, "url": "spotify:track:0ntQJM78wzOLVeCUAW7Y45"}, {"id": "1dzQoRqT5ucxXVaAhTcT0J", "artist": "Lady Gaga;Colby O'Donis", "title": "Just Dance", "year": 2008, "url": "spotify:track:1dzQoRqT5ucxXVaAhTcT0J"}, {"id": "5ChkMS8OtdzJeqyybCc9R5", "artist": "Michael Jackson", "title": "Billie Jean", "year": 2008, "url": "spotify:track:5ChkMS8OtdzJeqyybCc9R5"}, {"id": "6RgGppm2SSX5p246UqfdEi", "artist": "Lynyrd Skynyrd", "title": "Sweet Home Alabama", "year": 2008, "url": "spotify:track:6RgGppm2SSX5p246UqfdEi"}, {"id": "1mea3bSkSGXuIRvnydlB5b", "artist": "Coldplay", "title": "Viva La Vida", "year": 2008, "url": "spotify:track:1mea3bSkSGXuIRvnydlB5b"}, {"id": "456WNXWhDwYOSf5SpTuqxd", "artist": "Florence + The Machine", "title": "Dog Days Are Over", "year": 2009, "url": "spotify:track:456WNXWhDwYOSf5SpTuqxd"}, {"id": "2igwFfvr1OAGX9SKDCPBwO", "artist": "JAŸ-Z;Alicia Keys", "title": "Empire State Of Mind", "year": 2009, "url": "spotify:track:2igwFfvr1OAGX9SKDCPBwO"}, {"id": "4kLLWz7srcuLKA7Et40PQR", "artist": "Black Eyed Peas", "title": "I Gotta Feeling", "year": 2009, "url": "spotify:track:4kLLWz7srcuLKA7Et40PQR"}, {"id": "3ydfhgIZIc2j39NLIhpJpq", "artist": "CeeLo Green", "title": "Fuck You", "year": 2010, "url": "spotify:track:3ydfhgIZIc2j39NLIhpJpq"}, {"id": "5TgD3Wh5ZUZnUU4tmVvJbx", "artist": "The Weather Girls", "title": "It's Raining Men", "year": 2010, "url": "spotify:track:5TgD3Wh5ZUZnUU4tmVvJbx"}, {"id": "386RUes7n1uM1yfzgeUuwp", "artist": "Bruno Mars", "title": "The Lazy Song", "year": 2010, "url": "spotify:track:386RUes7n1uM1yfzgeUuwp"}, {"id": "7BqBn9nzAq8spo5e7cZ0dJ", "artist": "Bruno Mars", "title": "Just the Way You Are", "year": 2010, "url": "spotify:track:7BqBn9nzAq8spo5e7cZ0dJ"}, {"id": "0HPD5WQqrq7wPWR7P7Dw1i", "artist": "Kesha", "title": "TiK ToK", "year": 2010, "url": "spotify:track:0HPD5WQqrq7wPWR7P7Dw1i"}, {"id": "7xcZ0LbcUxLcZ3VzN1wIWS", "artist": "Gotye;Kimbra", "title": "Somebody That I Used To Know", "year": 2011, "url": "spotify:track:7xcZ0LbcUxLcZ3VzN1wIWS"}, {"id": "5HQVUIKwCEXpe7JIHyY734", "artist": "Snoop Dogg;Wiz Khalifa;Bruno Mars", "title": "Young, Wild & Free (feat. Bruno Mars)", "year": 2011, "url": "spotify:track:5HQVUIKwCEXpe7JIHyY734"}, {"id": "7w87IxuO7BDcJ3YUqCyMTT", "artist": "Foster The People", "title": "Pumped Up Kicks", "year": 2011, "url": "spotify:track:7w87IxuO7BDcJ3YUqCyMTT"}, {"id": "4QNpBfC0zvjKqPJcyqBy9W", "artist": "Pitbull;AFROJACK;Ne-Yo;Nayer", "title": "Give Me Everything (feat. Nayer)", "year": 2011, "url": "spotify:track:4QNpBfC0zvjKqPJcyqBy9W"}, {"id": "20I6sIOMTCkB6w7ryavxtO", "artist": "Carly Rae Jepsen", "title": "Call Me Maybe", "year": 2012, "url": "spotify:track:20I6sIOMTCkB6w7ryavxtO"}, {"id": "3bidbhpOYeV4knp8AIu8Xn", "artist": "Macklemore;Ryan Lewis;Macklemore & Ryan Lewis;Ray Dalton", "title": "Can't Hold Us (feat. Ray Dalton)", "year": 2012, "url": "spotify:track:3bidbhpOYeV4knp8AIu8Xn"}, {"id": "1o1Pny4JcE3LdUBeBedbm6", "artist": "Macklemore & Ryan Lewis;Macklemore;Ryan Lewis;Hollis;ScHoolboy Q", "title": "White Walls (feat. ScHoolboy Q & Hollis)", "year": 2012, "url": "spotify:track:1o1Pny4JcE3LdUBeBedbm6"}, {"id": "6REbwUNlppTfcnV4d4ZoZi", "artist": "Kendrick Lamar", "title": "Swimming Pools (Drank)", "year": 2012, "url": "spotify:track:6REbwUNlppTfcnV4d4ZoZi"}, {"id": "1h0IankTmrrWL66wtIy8Qs", "artist": "Maskinen", "title": "Krossa alla fönster", "year": 2012, "url": "spotify:track:1h0IankTmrrWL66wtIy8Qs"}, {"id": "0DwClY2t9YAWHBROMIgrXb", "artist": "The Lumineers", "title": "Ho Hey", "year": 2012, "url": "spotify:track:0DwClY2t9YAWHBROMIgrXb"}, {"id": "5rgy6ghBq1eRApCkeUdJXf", "artist": "fun.;Janelle Monáe", "title": "We Are Young (feat. Janelle Monáe)", "year": 2012, "url": "spotify:track:5rgy6ghBq1eRApCkeUdJXf"}, {"id": "66xHyI6ITToQPm7PdOzIyn", "artist": "Daft Punk;Pharrell Williams;Nile Rodgers", "title": "Get Lucky (feat. Pharrell Williams and Nile Rodgers)", "year": 2013, "url": "spotify:track:66xHyI6ITToQPm7PdOzIyn"}, {"id": "7oQSevUCbYs4QawXTHQVV1", "artist": "Robbie Williams", "title": "Rock DJ", "year": 2013, "url": "spotify:track:7oQSevUCbYs4QawXTHQVV1"}, {"id": "5odZrRY5d9ZxNhM1GTqLIv", "artist": "Panda Da Panda", "title": "Dansa Bonne dansa", "year": 2013, "url": "spotify:track:5odZrRY5d9ZxNhM1GTqLIv"}, {"id": "5JVbvCHX10U2pLa5DEqGav", "artist": "Capital Cities", "title": "Safe and Sound", "year": 2013, "url": "spotify:track:5JVbvCHX10U2pLa5DEqGav"}, {"id": "0ug5NqcwcFR2xrfTkc7k8e", "artist": "Taylor Swift", "title": "Style", "year": 2014, "url": "spotify:track:0ug5NqcwcFR2xrfTkc7k8e"}, {"id": "0cqRj7pUJDkTCEsJkx8snD", "artist": "Taylor Swift", "title": "Shake It Off", "year": 2014, "url": "spotify:track:0cqRj7pUJDkTCEsJkx8snD"}, {"id": "0FDzzruyVECATHXKHFs9eJ", "artist": "Coldplay", "title": "A Sky Full of Stars", "year": 2014, "url": "spotify:track:0FDzzruyVECATHXKHFs9eJ"}, {"id": "6sy3LkhNFjJWlaeSMNwQ62", "artist": "OneRepublic", "title": "Counting Stars", "year": 2014, "url": "spotify:track:6sy3LkhNFjJWlaeSMNwQ62"}, {"id": "7dS5EaCoMnN7DzlpT6aRn2", "artist": "Hozier", "title": "Take Me To Church", "year": 2014, "url": "spotify:track:7dS5EaCoMnN7DzlpT6aRn2"}, {"id": "6YUTL4dYpB9xZO5qExPf05", "artist": "Calvin Harris", "title": "Summer", "year": 2014, "url": "spotify:track:6YUTL4dYpB9xZO5qExPf05"}, {"id": "2uXlHCUbq9OMUwx3hrk06o", "artist": "Vance Joy", "title": "Riptide", "year": 2014, "url": "spotify:track:2uXlHCUbq9OMUwx3hrk06o"}, {"id": "0jQvysmjtBMRNjmHLe3gZK", "artist": "Kim Cesarion", "title": "Undressed", "year": 2014, "url": "spotify:track:0jQvysmjtBMRNjmHLe3gZK"}, {"id": "09CtPGIpYB4BrO8qb1RGsF", "artist": "Justin Bieber", "title": "Sorry", "year": 2015, "url": "spotify:track:09CtPGIpYB4BrO8qb1RGsF"}, {"id": "50kpGaPAhYJ3sGmk6vplg0", "artist": "Justin Bieber", "title": "Love Yourself", "year": 2015, "url": "spotify:track:50kpGaPAhYJ3sGmk6vplg0"}, {"id": "1Yk0cQdMLx5RzzFTYwmuld", "artist": "Adele", "title": "Hello", "year": 2015, "url": "spotify:track:1Yk0cQdMLx5RzzFTYwmuld"}, {"id": "2JzZzZUQj3Qff7wapcbKjc", "artist": "Wiz Khalifa;Charlie Puth", "title": "See You Again (feat. Charlie Puth)", "year": 2015, "url": "spotify:track:2JzZzZUQj3Qff7wapcbKjc"}, {"id": "6K4t31amVTZDgR3sKmwUJJ", "artist": "Tame Impala", "title": "The Less I Know The Better", "year": 2015, "url": "spotify:track:6K4t31amVTZDgR3sKmwUJJ"}, {"id": "46fHLVEQBcyC8VjnmdDF3q", "artist": "Shane Smith & the Saints", "title": "All I See Is You", "year": 2015, "url": "spotify:track:46fHLVEQBcyC8VjnmdDF3q"}, {"id": "7BKLCZ1jbUBVqRi2FVlTVw", "artist": "The Chainsmokers;Halsey", "title": "Closer", "year": 2016, "url": "spotify:track:7BKLCZ1jbUBVqRi2FVlTVw"}, {"id": "7MXVkk9YMctZqd1Srtv4MB", "artist": "The Weeknd;Daft Punk", "title": "Starboy", "year": 2016, "url": "spotify:track:7MXVkk9YMctZqd1Srtv4MB"}, {"id": "6RUKPb4LETWmmr3iAEQktW", "artist": "The Chainsmokers;Coldplay", "title": "Something Just Like This", "year": 2017, "url": "spotify:track:6RUKPb4LETWmmr3iAEQktW"}, {"id": "1rIKgCH4H52lrvDcz50hS8", "artist": "Zara Larsson", "title": "Lush Life", "year": 2017, "url": "spotify:track:1rIKgCH4H52lrvDcz50hS8"}, {"id": "2wrJq5XKLnmhRXHIAf9xBa", "artist": "Dan + Shay;Justin Bieber", "title": "10,000 Hours (with Justin Bieber)", "year": 2019, "url": "spotify:track:2wrJq5XKLnmhRXHIAf9xBa"}, {"id": "1BxfuPKGuaTgP7aM0Bbdwr", "artist": "Taylor Swift", "title": "Cruel Summer", "year": 2019, "url": "spotify:track:1BxfuPKGuaTgP7aM0Bbdwr"}, {"id": "0VjIjW4GlUZAMYd2vXMi3b", "artist": "The Weeknd", "title": "Blinding Lights", "year": 2020, "url": "spotify:track:0VjIjW4GlUZAMYd2vXMi3b"}, {"id": "4RqW6FZXZLUrndtWNaMGAf", "artist": "Giacomo Puccini;Luciano Pavarotti;John Alldis Choir;Wandsworth School Boys Choir;London Philharmonic Orchestra;Zubin Mehta", "title": "Turandot, Act III: Nessun dorma!", "year": 2020, "url": "spotify:track:4RqW6FZXZLUrndtWNaMGAf"}, {"id": "3K07bGe8iljQ3mOKArHLDo", "artist": "Chris Stapleton", "title": "Starting Over", "year": 2020, "url": "spotify:track:3K07bGe8iljQ3mOKArHLDo"}, {"id": "58AGoOGbwsQMhBbH0eFLRR", "artist": "Calvin Harris;The Weeknd", "title": "Over Now (with The Weeknd)", "year": 2020, "url": "spotify:track:58AGoOGbwsQMhBbH0eFLRR"}, {"id": "3DwQ7AH3xGD9h65ezslm6q", "artist": "Metallica", "title": "Enter Sandman - Remastered 2021", "year": 2021, "url": "spotify:track:3DwQ7AH3xGD9h65ezslm6q"}, {"id": "25tsnA5lDP4UctAQOoa8Ks", "artist": "Diddy;112;Faith Evans", "title": "I'll Be Missing You", "year": 2022, "url": "spotify:track:25tsnA5lDP4UctAQOoa8Ks"}, {"id": "3nEHrvNNtgLv9rneTAYVr4", "artist": "Swedish House Mafia;Connie Constance", "title": "Heaven Takes You Home (feat. Connie Constance)", "year": 2022, "url": "spotify:track:3nEHrvNNtgLv9rneTAYVr4"}, {"id": "0daHbdrLvUmkh81rnolMcG", "artist": "The Rolling Stones", "title": "Angry", "year": 2023, "url": "spotify:track:0daHbdrLvUmkh81rnolMcG"}, {"id": "1kuGVB7EU95pJObxwvfwKS", "artist": "Olivia Rodrigo", "title": "vampire", "year": 2023, "url": "spotify:track:1kuGVB7EU95pJObxwvfwKS"}, {"id": "4zpNfuWJA3K4d9TS4qnOIB", "artist": "Tommy Cash", "title": "Espresso Macchiato", "year": 2024, "url": "spotify:track:4zpNfuWJA3K4d9TS4qnOIB"}, {"id": "0TFTAtCYhp2tQ9KcJIZb55", "artist": "sombr", "title": "undressed", "year": 2025, "url": "spotify:track:0TFTAtCYhp2tQ9KcJIZb55"}, {"id": "05od2qm2MTSKCHxy1GBp5W", "artist": "sombr", "title": "12 to 12", "year": 2025, "url": "spotify:track:05od2qm2MTSKCHxy1GBp5W"}, {"id": "7qjZnBKE73H4Oxkopwulqe", "artist": "sombr", "title": "back to friends", "year": 2025, "url": "spotify:track:7qjZnBKE73H4Oxkopwulqe"}, {"id": "6sGIMrtIzQjdzNndVxe397", "artist": "Olivia Dean", "title": "So Easy (To Fall In Love)", "year": 2025, "url": "spotify:track:6sGIMrtIzQjdzNndVxe397"}, {"id": "30xAneAHxuzOE7MPZ1mssU", "artist": "Lilla Al-Fadji", "title": "Delulu", "year": 2026, "url": "spotify:track:30xAneAHxuzOE7MPZ1mssU"}, {"id": "1XmLPHkuv95o5NUodggzfv", "artist": "FELICIA", "title": "My System", "year": 2026, "url": "spotify:track:1XmLPHkuv95o5NUodggzfv"}]);
+
+const START_TOKENS=3;
+const MAX_TOKENS=5;
+let WIN=10;
+
+// phases: draw | listen | place | challenge | reveal
+let S={
+  screen:'setup',inputs:['',''],
+  players:[],deck:[],pidx:0,
+  card:null,phase:'draw',
+  placedPos:null,
+  challengePending:[],
+  challengeBets:{},
+  guessArtist:'',guessTitle:'',guessYear:'',
+  revealData:null,winner:null,
+  luckRound:false,      // Lyckorunda mode on/off
+  turnStartCards:null,  // snapshot of cards at turn start
+  turnGained:0          // cards gained this turn (not yet banked)
+};
+
+
+function isMello(){
+  const p=PLAYLISTS_DATA[currentPlaylist];
+  return p&&p.key==='mello';
+}
+function isWik(){
+  const p=PLAYLISTS_DATA[currentPlaylist];
+  return p&&p.key==='wikstrand';
+}
+function applyTheme(){
+  const app=document.getElementById('app');
+  if(app) app.className=isMello()?'mello-mode':isWik()?'wik-mode':'';
+}
+  
+function resetGame(){
+  S={...S,screen:'setup',players:[],deck:[],pidx:0,card:null,phase:'draw',placedPos:null,challengePending:[],challengeBets:{},guessArtist:'',guessTitle:'',revealData:null,winner:null,reachedGoal:null,finalRound:false};
+}
+// Check if a player has reached the win condition — handles "last chance" round
+function checkWin(playerIdx){
+  const p=S.players[playerIdx];
+  if(p.cards.length<WIN)return;
+  if(!S.luckRound){
+    // Original mode: instant win
+    S.winner=p.name;return;
+  }
+  // Luck round: first player to reach WIN triggers final round
+  // The other players each get one more turn to match/beat
+  if(!S.reachedGoal){
+    S.reachedGoal={pidx:playerIdx,name:p.name};
+    // If this is the LAST player in turn order, game over immediately
+    if(playerIdx===S.players.length-1){
+      S.winner=p.name;
+    } else {
+      S.finalRound=true;
+    }
+  } else {
+    // Another player also reached goal during final round — will be resolved at end
+  }
+}
+function resolveFinalRound(){
+  // Called when final round ends — compare all players
+  const sorted=[...S.players].sort((a,b)=>b.cards.length-a.cards.length);
+  S.winner=sorted[0].name;
+}
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b}
+function insertChron(cards,card){
+  // Insert card into a chronologically sorted array at the correct position
+  const nc=[...cards];
+  const idx=nc.findIndex(c=>c.year>card.year);
+  if(idx===-1) nc.push(card); else nc.splice(idx,0,card);
+  return nc;
+}
+function sortChron(cards){return[...cards].sort((a,b)=>a.year-b.year)}
+function okPos(cards,pos,year){
+  if(!cards.length)return true;
+  const lo=pos>0?cards[pos-1].year:-Infinity;
+  const hi=pos<cards.length?cards[pos].year:Infinity;
+  return year>=lo&&year<=hi;
+}
+function h(el,ev,fn,opts){el&&el.addEventListener(ev,fn,opts)}
+function clamp(n,a,b){return Math.max(a,Math.min(b,n))}
+function norm(s){return(s||'').trim().toLowerCase().replace(/[^a-zåäö0-9 ]/g,'').replace(/ +/g,' ')}
+function levenshtein(a,b){
+  const m=a.length,n=b.length;
+  const dp=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i===0?j:j===0?i:0));
+  for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)
+    dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  return dp[m][n];
+}
+function namesMatch(guess,truth){
+  const g=norm(guess), t=norm(truth);
+  if(!g)return false;
+  if(g===t||t.includes(g)||g.includes(t))return true;
+  // Allow fuzzy: levenshtein distance <= 2 for short strings, <= 3 for longer
+  const maxDist=t.length<=6?1:t.length<=12?2:3;
+  if(levenshtein(g,t)<=maxDist)return true;
+  // Also check word by word — if all guess words appear (fuzzy) in truth
+  const gWords=g.split(' ').filter(w=>w.length>1);
+  const tWords=t.split(' ');
+  if(gWords.length>0&&gWords.every(gw=>tWords.some(tw=>levenshtein(gw,tw)<=1)))return true;
+  return false;
+}
+
+// --- Timeline HTML builder ---
+// mode: 'view' | 'place' | 'placed-preview' | 'challenge-gaps' | 'challenge-placed'
+function buildTl(cards, mode, pendingPos, bets){
+  bets=bets||{};
+  let html='';
+  for(let i=0;i<=cards.length;i++){
+    // Gather bettors at this gap
+    const bettorsHere=Object.entries(bets).filter(([pi,p])=>+p===i).map(([pi])=>S.players[+pi]?.name||'?');
+    const taken=bettorsHere.length>0;
+    if(mode==='place'){
+      html+=`<button class="gap" data-pos="${i}">▼</button>`;
+    } else if(mode==='placed-preview'){
+      // Card placed but not confirmed — show mystery card at pendingPos, gaps everywhere else
+      if(i===pendingPos){
+        html+=`<div class="tc-mystery" style="animation:popIn .25s ease"><div class="tc-mystery-icon">🎵</div><div class="tc-mystery-bets" style="font-size:.55rem;color:var(--accent)">HÄR</div></div>`;
+      } else {
+        html+=`<button class="gap" data-pos="${i}">▼</button>`;
+      }
+    } else if(mode==='challenge-placed'){
+      if(i===pendingPos){
+        const betStr=bettorsHere.length?`<div class="tc-mystery-bets">${bettorsHere.map(n=>n[0]).join('')} 🪙</div>`:'';
+        html+=`<div class="tc-mystery"><div class="tc-mystery-icon">🎵</div>${betStr}</div>`;
+      } else {
+        if(taken){
+          html+=`<button class="gap taken" data-pos="${i}" disabled>🪙</button>`;
+        } else {
+          html+=`<button class="gap" data-pos="${i}">▼</button>`;
+        }
+      }
+    } else {
+      html+=`<div style="width:30px;min-width:30px;flex-shrink:0"></div>`;
+    }
+    if(i<cards.length){
+      const c=cards[i];
+      html+=`<div class="tc${c._new?' new':''}"><div class="tca">${c.artist}</div><div class="tct">${c.title}</div><div class="tcy">${c.year}</div></div>`;
+    }
+  }
+  return html;
+}
+
+// --- Scoreboard ---
+function buildScoreboard(){
+  const max=Math.max(...S.players.map(p=>p.cards.length),0);
+  return`<div class="scoreboard">${S.players.map((p,i)=>`
+    <div class="score-row${i===S.pidx?' active':''}">
+      <div class="score-name">${p.name}</div>
+      <div class="score-tokens">${'🪙'.repeat(Math.min(p.tokens,MAX_TOKENS))}</div>
+      <div class="score-cards">${p.cards.length}/${WIN}</div>
+    </div>`).join('')}
+  </div>
+  <div class="pbar-out"><div class="pbar-in" style="width:${(max/WIN)*100}%"></div></div>
+  <div class="decklabel" style="margin-top:6px">${S.deck.length} låtar kvar · ${S.players[S.pidx].name}s tur</div>`;
+}
+
+// --- SETUP ---
+function updateRulesBox(R){
+  const b=R.querySelector('.rules-box');
+  if(!b)return;
+  if(S.luckRound){
+    b.innerHTML='<b>Lyckorunda:</b> Dra kort hur länge du vill på din tur.<br>🎯 Tryck <b>Säkra hem</b> för att behålla alla rätt den rundan.<br>❌ Gissar du fel tappar du alla kort du dragit denna runda.<br>⭐ Gissar du rätt på artist + titel + år → kortet säkras <b>alltid</b>, oavsett.';
+  } else {
+    b.innerHTML='<b>Originalregler:</b> Varje spelare börjar med 1 kort + 3 polletter.<br>🪙 Din tur: betala 1 pollett för att hoppa låt<br>🪙 Motståndarens tur: satsa på en position du tror är rätt<br>🪙🪙🪙 Byt 3 polletter mot ett gratiskort direkt på rätt plats<br><b>+1 pollett</b> om du gissar rätt artist + låttitel. Mål: '+WIN+' kort.';
+  }
+}
+function renderSetup(){
+  const R=document.getElementById('root');
+  R.innerHTML=`<div class="card">
+    <div class="label">Spelare</div>
+    ${S.inputs.map((n,i)=>`<div class="prow">
+      <span class="pnum">${i+1}.</span>
+      <input type="text" data-i="${i}" value="${n}" placeholder="Spelare ${i+1}">
+      ${S.inputs.length>2?`<button class="xbtn" data-rm="${i}">×</button>`:''}
+    </div>`).join('')}
+    ${S.inputs.length<6?`<button class="addbtn" id="addp">+ Lägg till spelare</button>`:''}
+    <div class="winsetting">
+      <label>Spelstil:</label>
+      <select id="modesel"><option value="original">Original</option><option value="luck">Lyckorunda</option></select>
+      <label>Mål:</label>
+      <select id="winsel">${[7,10,15].map(n=>`<option value="${n}"${n===WIN?' selected':''}>${n} kort</option>`).join('')}</select>
+    </div>
+    <div class="rules-box">
+      ${S.luckRound
+        ? '<b>Lyckorunda:</b> Dra kort hur länge du vill på din tur.<br>🎯 Tryck <b>Säkra hem</b> för att behålla alla rätt.<br>❌ Gissar du fel tappar du alla kort denna runda.<br>⭐ Rätt på artist + titel + år → kortet säkras alltid.'
+        : '<b>Originalregler:</b> Varje spelare börjar med 1 kort + 3 polletter.<br>🪙 Din tur: betala 1 pollett för att hoppa låt<br>🪙 Motståndarens tur: satsa på en position<br>🪙🪙🪙 Byt 3 polletter mot ett gratiskort<br><b>+1 pollett</b> om du gissar rätt artist + låttitel. Mål: '+WIN+' kort.'
+      }
+    </div>
+    <button class="pbtn" id="startbtn" ${S.inputs.filter(n=>n.trim()).length<2?'disabled':''}>Starta spelet ♫</button>
+  </div>`;
+  R.querySelectorAll('input[data-i]').forEach(el=>{
+    h(el,'input',e=>{S.inputs[+e.target.dataset.i]=e.target.value;const btn=R.querySelector('#startbtn');if(btn)btn.disabled=S.inputs.filter(n=>n.trim()).length<2;});
+  });
+  R.querySelectorAll('[data-rm]').forEach(el=>{h(el,'click',e=>{S.inputs.splice(+e.target.dataset.rm,1);renderSetup();});});
+  h(R.querySelector('#addp'),'click',()=>{S.inputs.push('');renderSetup();});
+  h(R.querySelector('#modesel'),'change',e=>{S.luckRound=e.target.value==='luck';updateRulesBox(R);});
+    h(R.querySelector('#winsel'),'change',e=>{WIN=+e.target.value;R.querySelector('.rules-box').innerHTML=R.querySelector('.rules-box').innerHTML.replace(/Mål: \d+ kort/,`Mål: ${WIN} kort`);});
+  h(R.querySelector('#startbtn'),'click',()=>{
+    const names=S.inputs.map(n=>n.trim()).filter(Boolean);
+    if(names.length<2)return;
+    const all=shuffle(getSongs());
+    S.players=names.map((name,i)=>({name,tokens:START_TOKENS,cards:[{...all[i],_new:false}]}));
+    S.deck=all.slice(names.length);
+    S.screen='game';S.pidx=0;S.phase='draw';
+    S.turnStartCards=S.players.map(p=>[...p.cards]);
+    S.turnGained=0;
+    render();
+  });
+}
+
+// --- MAIN RENDER ---
+function render(){
+  const plBar=document.querySelector('.playlist-bar');
+  if(plBar) plBar.style.display=S.screen==='setup'?'flex':'none';
+  if(S.screen==='setup'){renderSetup();return;}
+  const R=document.getElementById('root');
+  const {players,deck,pidx,card,phase,placedPos,challengePending,challengeBets,revealData}=S;
+  const cp=players[pidx];
+  const icon=isMello()?'🌟':'♫';
+
+  if(S.screen==='gameover'){
+    updatePlayer(null);
+    const winnerCards=S.players.find(p=>p.name===S.winner)?.cards.length||0;
+    const standings=S.players.map(p=>`${p.name}: ${p.cards.length} kort`).join(' · ');
+    R.innerHTML=`<div class="winscreen"><span class="wtrophy">🏆</span><div class="wname">${S.winner}</div><div class="wsub">vinner med ${winnerCards} kort!</div><div style="font-size:.82rem;color:var(--muted);margin-bottom:24px">${standings}</div><button class="pbtn" id="again">Spela igen</button></div>`;
+    h(R.querySelector('#again'),'click',()=>{resetGame();render();});
+    return;
+  }
+
+  // Handoff screen — pass the device
+  if(phase==='handoff'){
+    R.innerHTML=`<div class="handoff-screen">
+      <span class="handoff-icon">📱</span>
+      <div class="handoff-name">${cp.name}</div>
+      <div class="handoff-sub">Det är din tur</div>
+      <button class="handoff-btn" id="handoff-ready">Jag är redo ♫</button>
+    </div>`;
+    h(R.querySelector('#handoff-ready'),'click',()=>{
+      S.phase='draw';render();
+    });
+    return;
+  }
+
+  let html=buildScoreboard();
+
+  // DRAW
+  if(phase==='draw'){
+    // Check if deck is empty
+    if(deck.length===0){
+      const sorted=[...players].sort((a,b)=>b.cards.length-a.cards.length);
+      const topCount=sorted[0].cards.length;
+      const winners=sorted.filter(p=>p.cards.length===topCount);
+      html+=`<div class="deck-empty">
+        <div class="deck-empty-title">Alla låtar är slut!</div>
+        <div class="deck-empty-sub">${winners.length===1
+          ?`${winners[0].name} vinner med ${topCount} kort!`
+          :`Oavgjort mellan ${winners.map(w=>w.name).join(' & ')} (${topCount} kort var)`
+        }</div>
+      </div>
+      <div style="height:12px"></div>
+      ${buildScoreboard().replace(buildScoreboard(),'')}
+      ${players.map(p=>`<div style="width:100%;max-width:480px">
+        <div class="tl-label">${p.name} — ${p.cards.length} kort</div>
+        <div class="tl">${buildTl(p.cards,'view',null,{})}</div>
+      </div>`).join('')}
+      <button class="pbtn" id="again" style="max-width:340px;margin-top:16px">Spela igen</button>`;
+    } else {
+      const luckBankBtn=S.luckRound&&S.turnGained>0
+        ?`<button class="abtn abtn-luck-bank" id="bankbtn">✅ Säkra hem (${S.turnGained} kort)</button>`:'';
+      const luckStreak=S.luckRound&&S.turnGained>0
+        ?`<div class="luck-streak">🔥 ${S.turnGained} kort denna runda — säkra hem eller fortsätt?</div>`:'';
+      html+=`<div class="drawarea">
+        <div class="deckvis" id="drawvis"><div class="dc">${icon}</div><div class="dc">${icon}</div><div class="dc" style="color:var(--muted2)">${icon}</div></div>
+        ${luckStreak}
+        <div class="action-row">
+          <button class="abtn abtn-primary" id="drawbtn">Dra ett kort</button>
+          ${S.luckRound?luckBankBtn:`<button class="abtn abtn-gold" id="tradebtn" ${cp.tokens<3?'disabled':''} title="Byt 3 polletter mot 1 gratiskort">🪙×3 → Gratiskort</button>`}
+        </div>
+        <div class="tl-wrap">
+          <div class="tl-label">Din tidslinje${S.luckRound&&S.turnGained>0?' (ej säkrade kort visas)':''}</div>
+          <div class="tl">${buildTl(cp.cards,'view',null,{})}</div>
+        </div>
+      </div>`;
+    }
+  }
+
+  // LISTEN — place card (movable until confirmed)
+  if(phase==='listen'&&card){
+    const hasPlaced=placedPos!==null;
+    html+=`<div class="mystery-card">
+        <span class="mystery-icon">🎵</span>
+        <div class="mystery-title">${hasPlaced?'Kortet placerat — nöjd?':'Okänt kort'}</div>
+        <div class="mystery-sub">${hasPlaced
+          ?'Tryck på en annan position för att flytta, eller bekräfta nedan'
+          :'Lyssna och gissa var den hör hemma — placera sedan kortet nedåt i tidslinjen'}</div>
+      </div>
+      <div class="action-row" style="width:100%;max-width:440px">
+        ${hasPlaced?`<button class="abtn abtn-primary" id="confirmbtn">✔ Bekräfta position</button>`:''}
+        ${!S.luckRound?`<button class="abtn abtn-secondary" id="skipbtn" ${cp.tokens<1?'disabled':''}>🪙 Hoppa låt (${cp.tokens} kvar)</button>`:''}
+      </div>
+      <div class="tl-wrap">
+        <div class="tl-label">${hasPlaced?'Tryck på en annan plats för att flytta':'Välj position'}</div>
+        <div class="tl">${buildTl(cp.cards,hasPlaced?'placed-preview':'place',placedPos,{})}</div>
+      </div>`;
+  }
+
+  // CHALLENGE — opponents bet, active player guesses name
+  if(phase==='challenge'&&card){
+    const opponents=players.map((p,i)=>({...p,i})).filter(p=>p.i!==pidx);
+    const allDone=challengePending.length===0;
+
+    html+=`<div class="mystery-card" style="margin-bottom:0">
+        <span class="mystery-icon">🎵</span>
+        <div class="mystery-title">Kortet är placerat</div>
+        <div class="mystery-sub">Motståndare: vill ni satsa en pollett på en position?</div>
+      </div>
+      <div class="tl-wrap">
+        <div class="tl-label">Tidslinje — välj position att satsa på</div>
+        <div class="tl">${buildTl(cp.cards,'challenge-placed',placedPos,challengeBets)}</div>
+      </div>
+      <div class="challenge-panel">
+        <div class="panel-title">Pollettsatsning</div>
+        ${opponents.map(opp=>{
+          const decided=!challengePending.includes(opp.i);
+          const hasBet=challengeBets[opp.i]!==undefined;
+          if(decided){
+            return `<div class="opp-row">
+              <div class="opp-left"><div class="opp-name">${opp.name}</div></div>
+              <span class="decided-badge ${hasBet?'decided-bet':'decided-pass'}">${hasBet?'🪙 Satsad':'Passar'}</span>
+            </div>`;
+          }
+          return `<div class="opp-row">
+            <div class="opp-left">
+              <div class="opp-name">${opp.name}</div>
+              <div class="opp-tokens">🪙 ${opp.tokens} pollett${opp.tokens===1?'':'er'}</div>
+            </div>
+            <div class="opp-right">
+              <button class="btn-challenge" data-chal="${opp.i}" ${opp.tokens<1?'disabled':''}>🪙 Satsa</button>
+              <button class="btn-pass" data-pass="${opp.i}">Passar</button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      
+      <button class="abtn abtn-primary" id="flipbtn" style="width:100%;max-width:440px;padding:15px" ${!allDone?'disabled':''}>
+        🔄 Vänd kortet${!allDone?' — väntar på motståndare':''}
+      </button>`;
+  }
+
+  // TRADE — place free card
+  if(phase==='trade'){
+    html+=`<div class="mystery-card">
+        <span class="mystery-icon">🎁</span>
+        <div class="mystery-title">Gratiskort</div>
+        <div class="mystery-sub">Du bytte 3 polletter. Placera kortet direkt på rätt plats!</div>
+
+      </div>
+      <div class="tl-wrap">
+        <div class="tl-label">Välj rätt position</div>
+        <div class="tl">${buildTl(cp.cards,'place',null,{})}</div>
+      </div>`;
+  }
+
+  // REVEAL
+  if(phase==='reveal'&&revealData){
+    const {correct,gotToken,cardData,outcomes,isTrade}=revealData;
+    html+=`<div class="reveal-area">
+      ${!isTrade?`<div class="rbanner ${correct?'ok':'no'}">
+        <span class="remoji">${correct?'✅':'❌'}</span>
+        <div class="rtext">${correct?'Rätt placerat!':'Fel — kortet förlorat!'}</div>
+        <div class="rsub">${correct?'Kortet stannar på tidslinjen.':'Kortet kastas ur spelet.'}</div>
+      </div>`:`<div class="rbanner gold">
+        <span class="remoji">🎁</span>
+        <div class="rtext">Gratiskort placerat!</div>
+        <div class="rsub">Kortet lades direkt på rätt plats.</div>
+      </div>`}
+      <div class="reveal-card">
+        <span class="sbadge">Avslöjat</span>
+        <div class="sartist">${cardData.artist}</div>
+        <div class="stitle">"${cardData.title}"</div>
+        <div class="ylabel">Utgivningsår</div>
+        <span class="syear">${cardData.year}</span>
+      </div>
+      ${!revealData.guessConfirmed&&!revealData.isTrade?`
+      <div class="guess-confirm-panel">
+        <div class="gc-label">Gissade ${cp.name} rätt?</div>
+        <div class="gc-btns">
+          <button class="gc-btn gc-star" id="gcStar">⭐ Artist + titel + år</button>
+          <button class="gc-btn gc-good" id="gcGood">✅ Artist + titel</button>
+          <button class="gc-btn gc-bad"  id="gcBad">❌ Gissade fel</button>
+        </div>
+      </div>`:''}
+      ${(revealData.guessConfirmed&&outcomes.length)?`<div class="outcomes">${outcomes.map(o=>`
+        <div class="outcome-item">
+          <div class="outcome-name">${o.name}</div>
+          <div class="outcome-text ${o.cls}">${o.text}</div>
+        </div>`).join('')}</div>`:''}
+      <div class="tl-wrap">
+        <div class="tl-label">Din tidslinje</div>
+        <div class="tl">${buildTl(cp.cards,'view',null,{})}</div>
+      </div>
+      ${revealData.guessConfirmed?(
+        S.luckRound&&revealData.correct&&!revealData.isTrade&&!S.winner&&cp.cards.length<WIN?`
+          <button class="abtn abtn-luck-bank" id="bankbtn-reveal">✅ Säkra hem (${S.turnGained} kort)</button>`:''
+      ):''}
+      ${revealData.guessConfirmed?`
+      <button class="nbtn" id="nextbtn">${
+        S.winner?`🏆 ${S.winner} vinner!`
+        :S.luckRound&&cp.cards.length>=WIN?`🏁 ${cp.name} når ${WIN} kort! Nästa: ${players[(pidx+1)%players.length].name} →`
+        :S.luckRound&&revealData.correct&&!revealData.isTrade?`🎲 Fortsätt runda →`
+        :`${S.luckRound&&!revealData.correct?'😬 ':''} Nästa: ${players[(pidx+1)%players.length].name} →`
+      }</button>`:''}
+    </div>`;
+  }
+
+  R.innerHTML=html;
+  bindEvents();
+  // Scroll fade indicators on timelines
+  R.querySelectorAll('.tl-wrap').forEach(wrap=>{
+    const tl=wrap.querySelector('.tl');
+    if(!tl)return;
+    const check=()=>{
+      const canLeft=tl.scrollLeft>10;
+      const canRight=tl.scrollLeft+tl.clientWidth<tl.scrollWidth-10;
+      wrap.classList.toggle('can-scroll-left',canLeft);
+      wrap.classList.toggle('can-scroll-right',canRight);
+    };
+    tl.addEventListener('scroll',check,{passive:true});
+    check();
+  });
+  // Auto-scroll to center the mystery card (placed-preview) or selected gap
+  R.querySelectorAll('.tc-mystery').forEach(el=>{
+    el.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+  });
+}
+
+function bindEvents(){
+  const R=document.getElementById('root');
+  const {players,pidx,card,phase,placedPos,challengePending,challengeBets}=S;
+  const cp=players[pidx];
+
+  if(phase==='draw'){
+    // Deck empty — "play again" button
+    h(R.querySelector('#again'),'click',()=>{resetGame();render();});
+    const doDraw=()=>{
+      if(!S.deck.length)return;
+      const[c,...rest]=S.deck;
+      S.card={...c};S.deck=rest;S.phase='listen';S.placedPos=null;
+      updatePlayer(c.url.replace('spotify:track:',''));
+      render();
+    };
+    h(R.querySelector('#drawbtn'),'click',doDraw);
+    h(R.querySelector('#drawvis'),'click',doDraw);
+    h(R.querySelector('#bankbtn'),'click',()=>{
+      // Bank all gained cards — they're already on timeline, just advance turn
+      doNextTurn();
+    });
+    h(R.querySelector('#tradebtn'),'click',()=>{
+      if(cp.tokens<3)return;
+      // draw card, deduct 3 tokens, go to trade phase
+      if(!S.deck.length)return;
+      const[c,...rest]=S.deck;
+      S.card={...c};S.deck=rest;
+      S.players[S.pidx].tokens=clamp(cp.tokens-3,0,MAX_TOKENS);
+      S.phase='trade';
+      updatePlayer(c.url.replace('spotify:track:',''));
+      render();
+    });
+  }
+
+  if(phase==='listen'){
+    R.querySelectorAll('.gap[data-pos]').forEach(el=>{
+      h(el,'click',e=>{
+        // Just set position — don't lock yet
+        S.placedPos=+e.target.dataset.pos;
+        render();
+      });
+    });
+    // Confirm button — locks position and moves to challenge
+    h(R.querySelector('#confirmbtn'),'click',()=>{
+      if(S.placedPos===null)return;
+      S.challengePending=S.players.map((_,i)=>i).filter(i=>i!==S.pidx);
+      S.challengeBets={};
+      S.phase='challenge';render();
+    });
+    h(R.querySelector('#skipbtn'),'click',()=>{
+      if(S.players[S.pidx].tokens<1)return;
+      S.players[S.pidx].tokens=clamp(cp.tokens-1,0,MAX_TOKENS);
+      S.placedPos=null;
+      // put card back, draw new one
+      S.deck=[...S.deck,S.card];
+      const[c,...rest]=shuffle(S.deck);
+      S.card={...c};S.deck=rest;
+      render();
+    });
+  }
+
+  if(phase==='challenge'){
+    // Challenge buttons — click sets to "choose position" mode
+    R.querySelectorAll('.btn-challenge[data-chal]').forEach(el=>{
+      h(el,'click',e=>{
+        const pi=+e.target.dataset.chal;
+        el.textContent='→ Klicka position i tidslinjen';
+        el.disabled=true;
+        e.target.closest('.opp-row').querySelector('.btn-pass').disabled=true;
+        // enable gap clicks for this opponent
+        R.querySelectorAll('.gap[data-pos]:not([disabled])').forEach(g=>{
+          h(g,'click',ev=>{
+            const pos=+ev.target.dataset.pos;
+            S.challengeBets[pi]=pos;
+            S.players[pi].tokens=clamp(S.players[pi].tokens-1,0,MAX_TOKENS);
+            S.challengePending=S.challengePending.filter(x=>x!==pi);
+            render();
+          },{once:true});
+        });
+      });
+    });
+    R.querySelectorAll('.btn-pass[data-pass]').forEach(el=>{
+      h(el,'click',e=>{
+        const pi=+e.target.dataset.pass;
+        S.challengePending=S.challengePending.filter(x=>x!==pi);
+        render();
+      });
+    });
+    // Save guess inputs live
+
+    h(R.querySelector('#flipbtn'),'click',()=>{
+      if(S.challengePending.length>0)return;
+      doReveal(false);
+    });
+  }
+
+  if(phase==='trade'){
+    R.querySelectorAll('.gap[data-pos]').forEach(el=>{
+      h(el,'click',e=>{
+        const pos=+e.target.dataset.pos;
+        const c={...S.card,_new:true};
+        const nc=[...cp.cards.slice(0,pos),c,...cp.cards.slice(pos)];
+        S.players[S.pidx]={...cp,cards:nc};
+        checkWin(S.pidx);
+        S.revealData={correct:true,gotToken:false,cardData:S.card,outcomes:[],isTrade:true};
+        S.phase='reveal';render();
+      });
+    });
+  }
+
+  if(phase==='reveal'){
+    h(R.querySelector('#bankbtn-reveal'),'click',()=>{doNextTurn();});
+    h(R.querySelector('#gcStar'),'click',()=>{applyGuessResult('star');});
+    h(R.querySelector('#gcGood'),'click',()=>{applyGuessResult('good');});
+    h(R.querySelector('#gcBad'),'click',()=>{applyGuessResult('bad');});
+    h(R.querySelector('#nextbtn'),'click',()=>{
+      if(S.winner){S.screen='gameover';render();return;}
+      if(S.luckRound&&S.revealData&&!S.revealData.isTrade){
+        const playerReachedGoal=S.players[S.pidx].cards.length>=WIN;
+        if(S.revealData.correct&&!playerReachedGoal){
+          // Continue same player's turn — back to draw
+          S.card=null;S.placedPos=null;S.phase='draw';
+          S.challengePending=[];S.challengeBets={};
+          S.guessArtist='';S.guessTitle='';S.guessYear='';S.revealData=null;
+          S.players=S.players.map((p,i)=>({...p,cards:p.cards.map(c=>({...c,_new:false}))}));
+          render();return;
+        } else if(S.revealData.correct&&playerReachedGoal){
+          // Player reached goal — end their turn, give others a chance
+          doNextTurn();return;
+        } else {
+          // Failed — revert cards (keep _securedStar), then advance player
+          const startCards=S.turnStartCards[S.pidx]||[];
+          const securedThisTurn=S.players[S.pidx].cards.filter(c=>c._securedStar&&!startCards.find(sc=>sc.id===c.id));
+          let revertCards=startCards.map(c=>({...c,_new:false}));
+          securedThisTurn.forEach(c=>{ revertCards=insertChron(revertCards,{...c,_new:false}); });
+          S.players[S.pidx]={...S.players[S.pidx],cards:revertCards};
+          S.turnGained=0;
+          doNextTurn();return;
+        }
+      }
+      doNextTurn();
+    });
+  }
+}
+
+function updatePlayer(trackId){
+  const pp=document.getElementById('persistent-player');
+  const iframe=document.getElementById('spotify-iframe');
+  if(!pp||!iframe)return;
+  if(trackId){
+    const newSrc='https://open.spotify.com/embed/track/'+trackId+'?utm_source=generator&theme=0';
+    // Only update src if it actually changed — avoids reloading/stopping playback
+    if(iframe.getAttribute('data-track')!==trackId){
+      iframe.src=newSrc;
+      iframe.setAttribute('data-track',trackId);
+    }
+    pp.style.display='block';
+  } else {
+    pp.style.display='none';
+    iframe.removeAttribute('data-track');
+    iframe.src='about:blank';
+  }
+}
+
+
+function doNextTurn(){
+  if(S.winner){S.screen='gameover';render();return;}
+  const nextPidx=(S.pidx+1)%S.players.length;
+  // Final round check: if we're about to give the turn back to the player who reached the goal, game over
+  if(S.finalRound&&S.reachedGoal&&nextPidx===S.reachedGoal.pidx){
+    resolveFinalRound();
+    S.screen='gameover';render();return;
+  }
+  S.pidx=nextPidx;
+  S.card=null;S.placedPos=null;S.phase='handoff';
+  S.challengePending=[];S.challengeBets={};
+  S.guessArtist='';S.guessTitle='';S.guessYear='';S.revealData=null;
+  S.turnGained=0;
+  S.turnStartCards=S.players.map(p=>[...p.cards]);
+  S.players=S.players.map(p=>({...p,cards:p.cards.map(c=>({...c,_new:false,_unsecured:false}))}));
+  updatePlayer(null);
+  render();
+}
+
+function doReveal(isTrade){
+  const cp=S.players[S.pidx];
+  const card=S.card;
+  const pos=S.placedPos;
+  const correct=okPos(cp.cards,pos,card.year);
+  const outcomes=[];
+
+  if(correct){
+    // Add card to timeline tentatively (no guess confirmed yet)
+    const newCard={...card,_new:true,_unsecured:S.luckRound,_securedStar:false};
+    const nc=[...cp.cards.slice(0,pos),newCard,...cp.cards.slice(pos)];
+    S.players[S.pidx]={...cp,cards:nc};
+    if(!S.luckRound) checkWin(S.pidx);
+    if(S.luckRound) S.turnGained++;
+    // Challengers who bet are wrong
+    Object.keys(S.challengeBets).forEach(pi=>{
+      outcomes.push({name:S.players[+pi].name,text:'Felaktig satsning — pollett förlorad',cls:'bad'});
+    });
+  } else {
+    // Wrong placement — check challengers
+    let cardTaken=false;
+    const challengers=Object.entries(S.challengeBets).map(([pi,betPos])=>({pi:+pi,betPos}))
+      .sort((a,b)=>{
+        const pa=S.players[a.pi], pb=S.players[b.pi];
+        if(pa.cards.length!==pb.cards.length)return pa.cards.length-pb.cards.length;
+        return pa.tokens-pb.tokens;
+      });
+    challengers.forEach(({pi,betPos})=>{
+      const opp=S.players[pi];
+      // betPos is on the ACTIVE player's timeline — check against cp.cards
+      if(!cardTaken&&okPos(cp.cards,betPos,card.year)){
+        // Challenger was right — place card at correct chronological position on THEIR timeline
+        const nc=insertChron(opp.cards,{...card,_new:true});
+        S.players[pi]={...opp,cards:nc};
+        outcomes.push({name:opp.name,text:'Rätt satsning — tar kortet! 🎉',cls:'good'});
+        checkWin(pi);
+        cardTaken=true;
+      } else if(!cardTaken){
+        outcomes.push({name:opp.name,text:'Fel position — pollett förlorad',cls:'bad'});
+      }
+    });
+    if(S.luckRound){
+      const lost=S.turnGained;
+      outcomes.push({name:cp.name,text:lost>0?`❌ Fel! Tappar ${lost} kort från denna runda.`:'❌ Fel! Kortet är förlorat.',cls:'bad'});
+    }
+  }
+
+  // guessConfirmed=false means we still show the confirm buttons
+  S.revealData={correct,gotToken:false,cardData:card,outcomes,isTrade,guessConfirmed:isTrade||!correct};
+  S.phase='reveal';
+  render();
+}
+
+function applyGuessResult(guessType){
+  // guessType: 'star' | 'good' | 'bad'
+  const cp=S.players[S.pidx];
+  const rd=S.revealData;
+  const card=rd.cardData;
+  const pos=S.placedPos;
+  const outcomes=[...rd.outcomes];
+
+  if(guessType==='star'){
+    // artist + title + year correct — secure card, no token
+    S.players[S.pidx].cards=S.players[S.pidx].cards.map(c=>
+      c.id===card.id&&c._new?{...c,_securedStar:true,_unsecured:false}:c
+    );
+    checkWin(S.pidx);
+    outcomes.push({name:cp.name,text:'⭐ Kortet säkras — rätt artist, titel & år!',cls:'gold'});
+  } else if(guessType==='good'){
+    // artist + title correct (NOT year):
+    // - Original mode: +1 token, card NOT secured
+    // - Luck round: NO reward (only star secures in luck round)
+    if(S.luckRound){
+      outcomes.push({name:cp.name,text:'Rätt artist & titel — men året saknades, kortet ej säkrat',cls:'good'});
+    } else if(cp.tokens<MAX_TOKENS){
+      S.players[S.pidx].tokens=clamp(cp.tokens+1,0,MAX_TOKENS);
+      outcomes.push({name:cp.name,text:'+1 pollett — rätt artist & titel! 🎉',cls:'good'});
+    } else {
+      outcomes.push({name:cp.name,text:'Rätt artist & titel! (Max polletter nådda)',cls:'good'});
+    }
+  }
+  // 'bad' = no reward, no message needed
+
+  S.revealData={...rd,outcomes,guessConfirmed:true};
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
