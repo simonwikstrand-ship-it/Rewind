@@ -1624,7 +1624,7 @@ function updatePlayer(trackId){
   const pp=document.getElementById('persistent-player');
   const iframe=document.getElementById('spotify-iframe');
   if(!pp||!iframe)return;
-  if(trackId){
+  if(trackId&&!trackId.startsWith('unknown_')){
     const newSrc='https://open.spotify.com/embed/track/'+trackId+'?utm_source=generator&theme=0';
     // Only update src if it actually changed — avoids reloading/stopping playback
     if(iframe.getAttribute('data-track')!==trackId){
