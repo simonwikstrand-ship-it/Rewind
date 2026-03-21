@@ -123,6 +123,7 @@ textarea{min-height:120px;resize:vertical}
       <div class="tab active" data-tab="stats">Statistik</div>
       <div class="tab" data-tab="playlists">Spellistor</div>
       <div class="tab" data-tab="events">Eventlogg</div>
+      <div class="tab" data-tab="feedback">Feedback</div>
       <div class="tab" data-tab="test">Testscenarier</div>
     </div>
 
@@ -191,6 +192,18 @@ textarea{min-height:120px;resize:vertical}
       <div class="card">
         <div class="card-title">Alla events (senaste 100)</div>
         <div id="events-table"><div class="loading">Laddar...</div></div>
+      </div>
+    </div>
+
+    <!-- FEEDBACK PANEL -->
+    <div class="panel" id="panel-feedback">
+      <div class="card">
+        <div class="card-title">Feedback från spelare</div>
+        <div class="refresh-bar">
+          <button class="btn btn-sm" id="refresh-feedback">Uppdatera</button>
+          <span class="last-updated" id="feedback-updated"></span>
+        </div>
+        <div id="feedback-list"><div class="empty">Laddar…</div></div>
       </div>
     </div>
 
@@ -314,6 +327,7 @@ function showAdmin(){
   loadStats();
   loadEvents();
   loadPlaylists();
+  loadFeedback();
 }
 
 // Login handler
@@ -636,6 +650,32 @@ document.getElementById('pl-save-btn').addEventListener('click',async()=>{
     updateSaveBtn();
   }
 });
+
+// --- FEEDBACK ---
+async function loadFeedback(){
+  try{
+    const fbs=await sbFetch('rewind_feedback?select=*&order=created_at.desc&limit=50');
+    const list=document.getElementById('feedback-list');
+    const ts=document.getElementById('feedback-updated');
+    ts.textContent='Uppdaterad '+new Date().toLocaleTimeString('sv');
+    if(!fbs||!fbs.length){list.innerHTML='<div class="empty">Ingen feedback ännu.</div>';return;}
+    list.innerHTML=fbs.map(fb=>{
+      const d=new Date(fb.created_at).toLocaleString('sv');
+      const name=fb.name||'Anonym';
+      const email=fb.email?` · <a href="mailto:${fb.email}" style="color:var(--accent)">${fb.email}</a>`:'';
+      return `<div class="pl-item">
+        <div class="pl-info">
+          <div class="pl-name">${name}${email}</div>
+          <div style="margin-top:6px;font-size:.88rem;line-height:1.5;color:var(--text)">${fb.message.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>
+          <div class="pl-meta" style="margin-top:6px">${d}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(err){
+    document.getElementById('feedback-list').innerHTML='<div class="empty">Fel: '+err.message+'</div>';
+  }
+}
+document.getElementById('refresh-feedback').addEventListener('click',loadFeedback);
 
 // --- TEST SCENARIOS ---
 function openTest(scenario){window.open(GAME_URL+'?test='+scenario,'_blank');}
