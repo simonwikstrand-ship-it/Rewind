@@ -7,41 +7,85 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0a0015;--surface:rgba(255,255,255,.06);--border:rgba(255,255,255,.12);--accent:#c084fc;--text:#f0e8ff;--muted:rgba(200,170,255,.55)}
+:root{--bg:#0a0015;--surface:rgba(255,255,255,.06);--border:rgba(255,255,255,.12);--accent:#c084fc;--text:#f0e8ff;--muted:rgba(200,170,255,.55);--success:#34d399;--danger:#f87171}
 body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;
   background-image:radial-gradient(ellipse at 15% 0%,rgba(139,92,246,.18) 0%,transparent 55%),radial-gradient(ellipse at 85% 10%,rgba(244,114,182,.12) 0%,transparent 50%);
   padding:32px 16px}
-.wrap{max-width:800px;margin:0 auto}
+.wrap{max-width:860px;margin:0 auto}
 h1{font-family:'Bebas Neue',sans-serif;font-size:2.5rem;letter-spacing:6px;
   background:linear-gradient(135deg,#f0abfc,#818cf8,#67e8f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center}
 .sub{font-size:.75rem;letter-spacing:4px;color:var(--muted);text-align:center;margin:4px 0 32px;text-transform:uppercase;font-weight:600}
-.tabs{display:flex;gap:4px;margin-bottom:24px}
-.tab{flex:1;padding:12px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;
+
+/* LOGIN */
+.login-screen{max-width:380px;margin:80px auto;text-align:center}
+.login-screen h1{margin-bottom:8px}
+.login-screen .sub{margin-bottom:32px}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;backdrop-filter:blur(12px)}
+.login-card .form-row{margin-bottom:16px;text-align:left}
+.login-error{color:var(--danger);font-size:.82rem;margin-top:12px;min-height:1.2em}
+.logout-btn{position:fixed;top:16px;right:16px;padding:6px 16px;font-family:'Bebas Neue',sans-serif;font-size:.8rem;letter-spacing:2px;
+  background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;color:var(--muted);cursor:pointer;transition:all .2s}
+.logout-btn:hover{background:rgba(248,113,113,.15);border-color:rgba(248,113,113,.3);color:var(--danger)}
+
+/* TABS */
+.tabs{display:flex;gap:4px;margin-bottom:24px;flex-wrap:wrap}
+.tab{flex:1;padding:12px;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;min-width:120px;
   background:var(--surface);border:1px solid var(--border);border-radius:12px;cursor:pointer;color:var(--muted);transition:all .2s}
 .tab.active{background:rgba(192,132,252,.15);border-color:var(--accent);color:var(--text)}
 .tab:hover:not(.active){background:rgba(255,255,255,.08)}
-.panel{display:none}
-.panel.active{display:block}
+.panel{display:none}.panel.active{display:block}
+
+/* CARDS */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:16px;backdrop-filter:blur(12px)}
 .card-title{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:3px;color:var(--accent);margin-bottom:16px;text-transform:uppercase}
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
 .stat{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;text-align:center}
 .stat-num{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:2px;color:var(--accent);line-height:1}
 .stat-label{font-size:.72rem;color:var(--muted);letter-spacing:1px;margin-top:4px;text-transform:uppercase;font-weight:600}
+
+/* TABLE */
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 th{text-align:left;padding:8px 12px;color:var(--muted);font-size:.7rem;letter-spacing:2px;text-transform:uppercase;font-weight:600;border-bottom:1px solid var(--border)}
 td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04)}
+
+/* BUTTONS */
 .btn{padding:10px 20px;font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:2px;
   background:linear-gradient(135deg,rgba(139,92,246,.7),rgba(99,102,241,.7));border:1px solid rgba(139,92,246,.3);
   border-radius:12px;color:#fff;cursor:pointer;transition:all .2s}
 .btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(139,92,246,.3)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
 .btn-sm{padding:6px 14px;font-size:.8rem;border-radius:8px}
 .btn-danger{background:linear-gradient(135deg,rgba(248,113,113,.6),rgba(239,68,68,.6));border-color:rgba(248,113,113,.3)}
+.btn-success{background:linear-gradient(135deg,rgba(52,211,153,.6),rgba(16,185,129,.6));border-color:rgba(52,211,153,.3)}
+
+/* FORMS */
 input,textarea,select{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'Barlow',sans-serif;font-size:.9rem;width:100%}
 input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(192,132,252,.1)}
 textarea{min-height:120px;resize:vertical}
 .form-row{margin-bottom:12px}
 .form-label{font-size:.72rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-weight:600;margin-bottom:4px}
+
+/* PLAYLIST SPECIFIC */
+.pl-item{display:flex;align-items:center;gap:12px;padding:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;margin-bottom:8px}
+.pl-item .pl-info{flex:1}
+.pl-item .pl-name{font-weight:600;font-size:.95rem}
+.pl-item .pl-meta{font-size:.75rem;color:var(--muted);margin-top:2px}
+.pl-item .pl-actions{display:flex;gap:6px}
+.pl-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:.65rem;letter-spacing:1px;text-transform:uppercase;font-weight:600}
+.pl-badge.active{background:rgba(52,211,153,.15);color:var(--success)}
+.pl-badge.inactive{background:rgba(248,113,113,.15);color:var(--danger)}
+.csv-drop{border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;margin:12px 0}
+.csv-drop:hover,.csv-drop.dragover{border-color:var(--accent);background:rgba(192,132,252,.05)}
+.csv-drop input[type="file"]{display:none}
+.csv-preview{max-height:200px;overflow-y:auto;font-size:.8rem;margin-top:12px}
+.csv-preview table{font-size:.75rem}
+.toast{position:fixed;bottom:24px;right:24px;padding:12px 24px;border-radius:12px;font-size:.85rem;font-weight:500;z-index:9999;
+  transform:translateY(100px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:rgba(52,211,153,.9);color:#fff}
+.toast.error{background:rgba(248,113,113,.9);color:#fff}
+
+/* TEST */
 .test-scenario{display:flex;align-items:center;gap:12px;padding:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;margin-bottom:8px}
 .test-scenario .desc{flex:1;font-size:.85rem}
 .test-scenario .desc b{color:var(--accent)}
@@ -49,116 +93,255 @@ textarea{min-height:120px;resize:vertical}
 .empty{color:var(--muted);font-size:.85rem;text-align:center;padding:24px}
 .refresh-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .last-updated{font-size:.7rem;color:var(--muted)}
+#admin-app{display:none}
 </style>
 </head>
 <body>
-<div class="wrap">
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen" class="login-screen">
   <h1>REWIND ADMIN</h1>
-  <div class="sub">Dashboard & Testverktyg</div>
-
-  <div class="tabs">
-    <div class="tab active" data-tab="stats">Statistik</div>
-    <div class="tab" data-tab="events">Eventlogg</div>
-    <div class="tab" data-tab="test">Testscenarier</div>
+  <div class="sub">Logga in för att fortsätta</div>
+  <div class="login-card">
+    <div class="form-row">
+      <div class="form-label">Lösenord</div>
+      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn" id="login-btn" style="width:100%;margin-top:8px">Logga in</button>
+    <div class="login-error" id="login-error"></div>
   </div>
+</div>
 
-  <!-- STATS PANEL -->
-  <div class="panel active" id="panel-stats">
-    <div class="refresh-bar">
-      <button class="btn btn-sm" id="refresh-stats">Uppdatera</button>
-      <span class="last-updated" id="stats-updated"></span>
-    </div>
-    <div class="card">
-      <div class="card-title">Översikt</div>
-      <div class="stat-grid" id="stats-grid">
-        <div class="loading">Laddar...</div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Populäraste spellistor</div>
-      <div id="playlist-stats"><div class="loading">Laddar...</div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Senaste spelen</div>
-      <div id="recent-games"><div class="loading">Laddar...</div></div>
-    </div>
-  </div>
+<!-- ADMIN APP (hidden until login) -->
+<div id="admin-app">
+  <button class="logout-btn" id="logout-btn">Logga ut</button>
+  <div class="wrap">
+    <h1>REWIND ADMIN</h1>
+    <div class="sub">Dashboard & Spellistor</div>
 
-  <!-- EVENTS PANEL -->
-  <div class="panel" id="panel-events">
-    <div class="refresh-bar">
-      <button class="btn btn-sm" id="refresh-events">Uppdatera</button>
-      <span class="last-updated" id="events-updated"></span>
+    <div class="tabs">
+      <div class="tab active" data-tab="stats">Statistik</div>
+      <div class="tab" data-tab="playlists">Spellistor</div>
+      <div class="tab" data-tab="events">Eventlogg</div>
+      <div class="tab" data-tab="test">Testscenarier</div>
     </div>
-    <div class="card">
-      <div class="card-title">Alla events (senaste 100)</div>
-      <div id="events-table"><div class="loading">Laddar...</div></div>
-    </div>
-  </div>
 
-  <!-- TEST PANEL -->
-  <div class="panel" id="panel-test">
-    <div class="card">
-      <div class="card-title">Testscenarier</div>
-      <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">
-        Klicka på ett scenario för att öppna Rewind med fördefinierade spelinställningar via URL-parametrar.
-      </p>
-      <div class="test-scenario">
-        <div class="desc"><b>Final Round-test</b> — Båda spelare har 9 kort, 1 kort kvar till vinst. Testar att final round triggas korrekt.</div>
-        <button class="btn btn-sm" onclick="openTest('final-round')">Kör</button>
+    <!-- STATS PANEL -->
+    <div class="panel active" id="panel-stats">
+      <div class="refresh-bar">
+        <button class="btn btn-sm" id="refresh-stats">Uppdatera</button>
+        <span class="last-updated" id="stats-updated"></span>
       </div>
-      <div class="test-scenario">
-        <div class="desc"><b>Full tidslinje</b> — Spelare 1 har 7 kort, Spelare 2 har 3. Testar scroll och visning med många kort.</div>
-        <button class="btn btn-sm" onclick="openTest('full-timeline')">Kör</button>
+      <div class="card">
+        <div class="card-title">Översikt</div>
+        <div class="stat-grid" id="stats-grid"><div class="loading">Laddar...</div></div>
       </div>
-      <div class="test-scenario">
-        <div class="desc"><b>Lyckorunda bust</b> — Lyckorunda-läge, spelare har 5 kort och 2 osäkrade. Testar revert-logik.</div>
-        <button class="btn btn-sm" onclick="openTest('luck-bust')">Kör</button>
+      <div class="card">
+        <div class="card-title">Populäraste spellistor</div>
+        <div id="playlist-stats"><div class="loading">Laddar...</div></div>
       </div>
-      <div class="test-scenario">
-        <div class="desc"><b>Token-utmaning</b> — Original-läge, spelare har 0 polletter. Testar begränsningar.</div>
-        <button class="btn btn-sm" onclick="openTest('no-tokens')">Kör</button>
-      </div>
-      <div class="test-scenario">
-        <div class="desc"><b>Tom kortlek</b> — Bara 3 kort kvar i leken. Testar deck-empty-hantering.</div>
-        <button class="btn btn-sm" onclick="openTest('empty-deck')">Kör</button>
+      <div class="card">
+        <div class="card-title">Senaste spelen</div>
+        <div id="recent-games"><div class="loading">Laddar...</div></div>
       </div>
     </div>
-    <div class="card">
-      <div class="card-title">Anpassat scenario</div>
-      <div class="form-row">
-        <div class="form-label">Spelläge</div>
-        <select id="test-mode"><option value="original">Original</option><option value="luck">Lyckorunda</option></select>
+
+    <!-- PLAYLISTS PANEL -->
+    <div class="panel" id="panel-playlists">
+      <div class="card">
+        <div class="card-title">Hantera spellistor</div>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">
+          Spellistor som är aktiva visas i spelets dropdown. Ladda upp nya via CSV. Accepterar flera format:
+          <br><span style="font-size:.72rem">• Rewind-format: title, artist, year, spotify</span>
+          <br><span style="font-size:.72rem">• Spotify-export: Track Name, Artist Name(s), Release Date, Track URI</span>
+          <br><span style="font-size:.72rem">• Verifierad: title, artist, year, original_year, flag, source, spotify (använder original_year)</span>
+        </p>
+        <div id="playlists-list"><div class="loading">Laddar...</div></div>
       </div>
-      <div class="form-row">
-        <div class="form-label">Kortmål</div>
-        <select id="test-goal"><option value="7">7</option><option value="10" selected>10</option><option value="15">15</option></select>
+      <div class="card">
+        <div class="card-title">Lägg till ny spellista</div>
+        <div class="form-row">
+          <div class="form-label">Namn</div>
+          <input type="text" id="pl-name" placeholder="T.ex. 90-talshits">
+        </div>
+        <div class="form-row">
+          <div class="form-label">Nyckel (kort, ingen mellanslag)</div>
+          <input type="text" id="pl-key" placeholder="T.ex. 90tal">
+        </div>
+        <div class="form-row">
+          <div class="form-label">Låtar (CSV-fil)</div>
+          <div class="csv-drop" id="csv-drop">
+            <div>Dra en CSV-fil hit eller <b>klicka för att välja</b></div>
+            <div style="font-size:.72rem;color:var(--muted);margin-top:4px">Stödjer Rewind-CSV, Spotify-export och verifierad CSV</div>
+            <input type="file" id="csv-file" accept=".csv,text/csv">
+          </div>
+          <div id="csv-status"></div>
+          <div class="csv-preview" id="csv-preview"></div>
+        </div>
+        <button class="btn" id="pl-save-btn" disabled>Spara spellista</button>
       </div>
-      <div class="form-row">
-        <div class="form-label">Spelare (JSON)</div>
-        <textarea id="test-players">[
+    </div>
+
+    <!-- EVENTS PANEL -->
+    <div class="panel" id="panel-events">
+      <div class="refresh-bar">
+        <button class="btn btn-sm" id="refresh-events">Uppdatera</button>
+        <span class="last-updated" id="events-updated"></span>
+      </div>
+      <div class="card">
+        <div class="card-title">Alla events (senaste 100)</div>
+        <div id="events-table"><div class="loading">Laddar...</div></div>
+      </div>
+    </div>
+
+    <!-- TEST PANEL -->
+    <div class="panel" id="panel-test">
+      <div class="card">
+        <div class="card-title">Testscenarier</div>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px">
+          Klicka på ett scenario för att öppna Rewind med fördefinierade spelinställningar via URL-parametrar.
+        </p>
+        <div class="test-scenario">
+          <div class="desc"><b>Final Round-test</b> — Båda spelare har 9 kort, 1 kort kvar till vinst.</div>
+          <button class="btn btn-sm" onclick="openTest('final-round')">Kör</button>
+        </div>
+        <div class="test-scenario">
+          <div class="desc"><b>Full tidslinje</b> — Spelare 1 har 7 kort, Spelare 2 har 3.</div>
+          <button class="btn btn-sm" onclick="openTest('full-timeline')">Kör</button>
+        </div>
+        <div class="test-scenario">
+          <div class="desc"><b>Lyckorunda bust</b> — Lyckorunda-läge med osäkrade kort.</div>
+          <button class="btn btn-sm" onclick="openTest('luck-bust')">Kör</button>
+        </div>
+        <div class="test-scenario">
+          <div class="desc"><b>Token-utmaning</b> — Original-läge, 0 polletter.</div>
+          <button class="btn btn-sm" onclick="openTest('no-tokens')">Kör</button>
+        </div>
+        <div class="test-scenario">
+          <div class="desc"><b>Tom kortlek</b> — Bara 3 kort kvar i leken.</div>
+          <button class="btn btn-sm" onclick="openTest('empty-deck')">Kör</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Anpassat scenario</div>
+        <div class="form-row">
+          <div class="form-label">Spelläge</div>
+          <select id="test-mode"><option value="original">Original</option><option value="luck">Lyckorunda</option></select>
+        </div>
+        <div class="form-row">
+          <div class="form-label">Kortmål</div>
+          <select id="test-goal"><option value="7">7</option><option value="10" selected>10</option><option value="15">15</option></select>
+        </div>
+        <div class="form-row">
+          <div class="form-label">Spelare (JSON)</div>
+          <textarea id="test-players">[
   {"name": "Simon", "tokens": 3, "cards": 5},
   {"name": "Test", "tokens": 2, "cards": 3}
 ]</textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-label">Kort kvar i leken</div>
+          <input type="number" id="test-deck" value="50">
+        </div>
+        <button class="btn" onclick="openCustomTest()" style="margin-top:8px">Öppna test</button>
       </div>
-      <div class="form-row">
-        <div class="form-label">Kort kvar i leken</div>
-        <input type="number" id="test-deck" value="50">
-      </div>
-      <button class="btn" onclick="openCustomTest()" style="margin-top:8px">Öppna test</button>
     </div>
   </div>
 </div>
 
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <script>
 const SB_URL='https://yixdarovmdlxkewdmhiq.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpeGRhcm92bWRseGtld2RtaGlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAxNDk3NDgsImV4cCI6MjA1NTcyNTc0OH0.c4fK2BpE5ocPFl9PEMsLFODe-BngDkJs4FY8UzvNgkQ';
-const GAME_URL='./index.html'; // relative to admin
+const GAME_URL='./index.html';
 
-async function sbFetch(path){
-  const r=await fetch(SB_URL+'/rest/v1/'+path,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
-  return r.json();
+// SHA-256 hash of admin password (RewindAdmin2024!)
+const ADMIN_HASH='3fcb09af6d4f1c7c10040e46d850420440a8c9238498e62f80387d7f3af96d3a';
+
+// --- TOAST ---
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast '+type+' show';
+  setTimeout(()=>t.classList.remove('show'),3000);
 }
+
+// --- AUTH (simple password-based) ---
+function sbHeaders(){
+  return {
+    'Content-Type':'application/json',
+    'apikey':SB_KEY,
+    'Authorization':'Bearer '+SB_KEY,
+    'Prefer':'return=representation'
+  };
+}
+
+async function sbFetch(path,opts={}){
+  const r=await fetch(SB_URL+'/rest/v1/'+path,{
+    ...opts,
+    headers:{...sbHeaders(),...(opts.headers||{})}
+  });
+  if(!r.ok){const e=await r.text();throw new Error(e);}
+  const ct=r.headers.get('content-type');
+  if(ct&&ct.includes('json'))return r.json();
+  return null;
+}
+
+async function hashPassword(pass){
+  const enc=new TextEncoder().encode(pass);
+  const buf=await crypto.subtle.digest('SHA-256',enc);
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function initAuth(){
+  if(localStorage.getItem('rewind_admin_auth')==='true'){
+    showAdmin();
+  } else {
+    showLogin();
+  }
+}
+
+function showLogin(){
+  document.getElementById('login-screen').style.display='block';
+  document.getElementById('admin-app').style.display='none';
+}
+
+function showAdmin(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('admin-app').style.display='block';
+  loadStats();
+  loadEvents();
+  loadPlaylists();
+}
+
+// Login handler
+document.getElementById('login-btn').addEventListener('click',async()=>{
+  const pass=document.getElementById('login-pass').value;
+  const errEl=document.getElementById('login-error');
+  errEl.textContent='';
+  if(!pass){errEl.textContent='Ange lösenord';return;}
+  const hash=await hashPassword(pass);
+  if(hash===ADMIN_HASH){
+    localStorage.setItem('rewind_admin_auth','true');
+    showAdmin();
+    toast('Inloggad!');
+  } else {
+    errEl.textContent='Fel lösenord';
+  }
+});
+
+// Enter key on password field
+document.getElementById('login-pass').addEventListener('keydown',e=>{
+  if(e.key==='Enter')document.getElementById('login-btn').click();
+});
+
+// Logout
+document.getElementById('logout-btn').addEventListener('click',()=>{
+  localStorage.removeItem('rewind_admin_auth');
+  showLogin();
+});
 
 // --- TABS ---
 document.querySelectorAll('.tab').forEach(tab=>{
@@ -174,10 +357,8 @@ document.querySelectorAll('.tab').forEach(tab=>{
 async function loadStats(){
   const now=new Date().toLocaleTimeString('sv');
   document.getElementById('stats-updated').textContent='Uppdaterad '+now;
-
   try{
     const events=await sbFetch('rewind_events?select=*&order=created_at.desc&limit=1000');
-
     const views=events.filter(e=>e.event_type==='page_view').length;
     const starts=events.filter(e=>e.event_type==='game_start').length;
     const completes=events.filter(e=>e.event_type==='game_complete').length;
@@ -190,32 +371,25 @@ async function loadStats(){
       <div class="stat"><div class="stat-num">${completes}</div><div class="stat-label">Avslutade spel</div></div>
       <div class="stat"><div class="stat-num">${starts>0?Math.round(completes/starts*100):0}%</div><div class="stat-label">Completion rate</div></div>
       <div class="stat"><div class="stat-num">${avgDur>60?Math.round(avgDur/60)+'m':avgDur+'s'}</div><div class="stat-label">Snittlängd</div></div>
-      <div class="stat"><div class="stat-num">${avgPlayers}</div><div class="stat-label">Snitt spelare</div></div>
-    `;
+      <div class="stat"><div class="stat-num">${avgPlayers}</div><div class="stat-label">Snitt spelare</div></div>`;
 
-    // Playlist stats
     const plCounts={};
     events.filter(e=>e.event_type==='game_start'&&e.playlist).forEach(e=>{plCounts[e.playlist]=(plCounts[e.playlist]||0)+1;});
     const sorted=Object.entries(plCounts).sort((a,b)=>b[1]-a[1]);
-    if(sorted.length){
-      document.getElementById('playlist-stats').innerHTML=`<table><thead><tr><th>Spellista</th><th>Antal spel</th></tr></thead><tbody>${sorted.map(([pl,c])=>`<tr><td>${pl}</td><td>${c}</td></tr>`).join('')}</tbody></table>`;
-    } else {
-      document.getElementById('playlist-stats').innerHTML='<div class="empty">Inga spel ännu</div>';
-    }
+    document.getElementById('playlist-stats').innerHTML=sorted.length
+      ?`<table><thead><tr><th>Spellista</th><th>Antal spel</th></tr></thead><tbody>${sorted.map(([pl,c])=>`<tr><td>${pl}</td><td>${c}</td></tr>`).join('')}</tbody></table>`
+      :'<div class="empty">Inga spel ännu</div>';
 
-    // Recent games
     const recent=events.filter(e=>e.event_type==='game_complete').slice(0,10);
-    if(recent.length){
-      document.getElementById('recent-games').innerHTML=`<table><thead><tr><th>Tid</th><th>Vinnare</th><th>Spellista</th><th>Läge</th><th>Längd</th></tr></thead><tbody>${recent.map(e=>{
+    document.getElementById('recent-games').innerHTML=recent.length
+      ?`<table><thead><tr><th>Tid</th><th>Vinnare</th><th>Spellista</th><th>Läge</th><th>Längd</th></tr></thead><tbody>${recent.map(e=>{
         const t=new Date(e.created_at).toLocaleString('sv',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
         const dur=e.duration_seconds?e.duration_seconds>60?Math.round(e.duration_seconds/60)+'m':e.duration_seconds+'s':'?';
         return`<tr><td>${t}</td><td>${e.winner||'?'}</td><td>${e.playlist||'?'}</td><td>${e.game_mode||'?'}</td><td>${dur}</td></tr>`;
-      }).join('')}</tbody></table>`;
-    } else {
-      document.getElementById('recent-games').innerHTML='<div class="empty">Inga avslutade spel ännu</div>';
-    }
+      }).join('')}</tbody></table>`
+      :'<div class="empty">Inga avslutade spel ännu</div>';
   }catch(err){
-    document.getElementById('stats-grid').innerHTML='<div class="empty">Kunde inte ladda data: '+err.message+'</div>';
+    document.getElementById('stats-grid').innerHTML='<div class="empty">Kunde inte ladda: '+err.message+'</div>';
   }
 }
 
@@ -235,11 +409,223 @@ async function loadEvents(){
   }
 }
 
-// --- TEST SCENARIOS ---
-function openTest(scenario){
-  const base=GAME_URL+'?test='+scenario;
-  window.open(base,'_blank');
+// --- PLAYLISTS ---
+let pendingSongs=[];
+
+async function loadPlaylists(){
+  try{
+    const pls=await sbFetch('rewind_playlists?select=*&order=sort_order.asc,created_at.asc');
+    const list=document.getElementById('playlists-list');
+    if(!pls||!pls.length){list.innerHTML='<div class="empty">Inga spellistor uppladdade ännu. Lägg till nedan!</div>';return;}
+    list.innerHTML=pls.map(pl=>{
+      const songCount=pl.songs?pl.songs.length:0;
+      const badge=pl.active?'<span class="pl-badge active">Aktiv</span>':'<span class="pl-badge inactive">Inaktiv</span>';
+      return`<div class="pl-item" data-id="${pl.id}">
+        <div class="pl-info">
+          <div class="pl-name">${pl.label} ${badge}</div>
+          <div class="pl-meta">Nyckel: ${pl.key} · ${songCount} låtar · Tillagd ${new Date(pl.created_at).toLocaleDateString('sv')}</div>
+        </div>
+        <div class="pl-actions">
+          <button class="btn btn-sm ${pl.active?'btn-danger':'btn-success'}" onclick="togglePlaylist(${pl.id},${!pl.active})">${pl.active?'Avaktivera':'Aktivera'}</button>
+          <button class="btn btn-sm btn-danger" onclick="deletePlaylist(${pl.id},'${pl.label.replace(/'/g,"\\'")}')">Ta bort</button>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(err){
+    document.getElementById('playlists-list').innerHTML='<div class="empty">Fel: '+err.message+'</div>';
+  }
 }
+
+async function togglePlaylist(id,active){
+  try{
+    await sbFetch('rewind_playlists?id=eq.'+id,{method:'PATCH',body:JSON.stringify({active,updated_at:new Date().toISOString()})});
+    toast(active?'Spellista aktiverad':'Spellista avaktiverad');
+    loadPlaylists();
+  }catch(e){toast('Fel: '+e.message,'error');}
+}
+
+async function deletePlaylist(id,name){
+  if(!confirm('Vill du verkligen ta bort "'+name+'"? Detta går inte att ångra.'))return;
+  try{
+    await sbFetch('rewind_playlists?id=eq.'+id,{method:'DELETE'});
+    toast('Spellista borttagen');
+    loadPlaylists();
+  }catch(e){toast('Fel: '+e.message,'error');}
+}
+
+// Robust CSV row parser — handles quoted fields with commas, newlines etc.
+function parseCSVRow(line){
+  const fields=[];let cur='';let inQ=false;
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if(inQ){
+      if(c==='"'&&line[i+1]==='"'){cur+='"';i++;}
+      else if(c==='"'){inQ=false;}
+      else{cur+=c;}
+    }else{
+      if(c==='"'){inQ=true;}
+      else if(c===','){fields.push(cur.trim());cur='';}
+      else{cur+=c;}
+    }
+  }
+  fields.push(cur.trim());
+  return fields;
+}
+
+// CSV parsing — supports multiple formats
+function parseCSV(text){
+  const lines=text.trim().split('\n');
+  if(lines.length<2)throw new Error('CSV måste ha rubrikrad + minst 1 låtrad');
+  const headers=parseCSVRow(lines[0]).map(h=>h.toLowerCase().replace(/"/g,'').trim());
+
+  // Detect format: Rewind (title,artist,year) / Spotify (Track Name,Artist Name(s),Release Date) / Verified (original_year)
+  const find=(arr)=>headers.findIndex(h=>arr.includes(h));
+  const titleIdx=find(['title','titel','låt','track name']);
+  const artistIdx=find(['artist','artist name(s)','artist names','artists']);
+  const yearIdx=find(['year','år','release date']);
+  const spotifyIdx=find(['spotify','spotify_id','spotifyid','track uri']);
+  const origYearIdx=find(['original_year','originalår']);
+  const flagIdx=find(['flag']);
+
+  if(titleIdx===-1||artistIdx===-1||yearIdx===-1)
+    throw new Error('CSV saknar obligatoriska kolumner. Behöver: title/Track Name, artist/Artist Name(s), year/Release Date');
+
+  const isSpotifyExport=headers.includes('track name')||headers.includes('release date');
+  const hasOrigYear=origYearIdx>=0;
+
+  const songs=[];
+  for(let i=1;i<lines.length;i++){
+    if(!lines[i].trim())continue;
+    const row=parseCSVRow(lines[i]);
+    if(row.length<3)continue;
+
+    const rawTitle=(row[titleIdx]||'').replace(/^"|"$/g,'').trim();
+    let rawArtist=(row[artistIdx]||'').replace(/^"|"$/g,'').trim();
+    const rawYear=(row[yearIdx]||'').replace(/^"|"$/g,'').trim();
+    const rawSpotify=spotifyIdx>=0?(row[spotifyIdx]||'').replace(/^"|"$/g,'').trim():'';
+
+    // Spotify exports use semicolon-separated artists — take first or join with &
+    if(rawArtist.includes(';'))rawArtist=rawArtist.split(';').map(a=>a.trim()).join(' & ');
+
+    // Year: might be "2005-08-30" (Spotify) or just "2005"
+    let year=parseInt(rawYear.substring(0,4));
+
+    // If verified CSV with original_year and flagged, use original_year
+    if(hasOrigYear){
+      const origYear=parseInt((row[origYearIdx]||'').replace(/^"|"$/g,'').trim());
+      const flag=flagIdx>=0?(row[flagIdx]||'').replace(/^"|"$/g,'').trim().toUpperCase():'';
+      if(!isNaN(origYear)&&origYear>0&&(flag==='FLAGGED'||origYear!==year)){
+        year=origYear;
+      }
+    }
+
+    // Spotify URI → extract just the ID for the game
+    let spotify=rawSpotify;
+    if(spotify.startsWith('spotify:track:'))spotify=spotify.replace('spotify:track:','');
+
+    if(!rawTitle||!rawArtist||isNaN(year))continue;
+    songs.push({id:i,title:rawTitle,artist:rawArtist,year,spotify});
+  }
+  if(songs.length===0)throw new Error('Inga giltiga låtrader hittades i filen');
+  return songs;
+}
+
+// CSV drop zone
+const csvDrop=document.getElementById('csv-drop');
+const csvFile=document.getElementById('csv-file');
+
+csvDrop.addEventListener('click',()=>csvFile.click());
+csvDrop.addEventListener('dragover',e=>{e.preventDefault();csvDrop.classList.add('dragover');});
+csvDrop.addEventListener('dragleave',()=>csvDrop.classList.remove('dragover'));
+csvDrop.addEventListener('drop',e=>{
+  e.preventDefault();csvDrop.classList.remove('dragover');
+  if(e.dataTransfer.files.length)handleCSV(e.dataTransfer.files[0]);
+});
+csvFile.addEventListener('change',e=>{if(e.target.files.length)handleCSV(e.target.files[0]);});
+
+function handleCSV(file){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const songs=parseCSV(e.target.result);
+      pendingSongs=songs;
+      document.getElementById('csv-status').innerHTML=`<span style="color:var(--success);font-size:.82rem">✓ ${songs.length} låtar inlästa från ${file.name}</span>`;
+      // Show preview
+      const preview=songs.slice(0,8);
+      document.getElementById('csv-preview').innerHTML=`<table><thead><tr><th>Titel</th><th>Artist</th><th>År</th><th>Spotify</th></tr></thead><tbody>${
+        preview.map(s=>`<tr><td>${s.title}</td><td>${s.artist}</td><td>${s.year}</td><td>${s.spotify?'✓':'—'}</td></tr>`).join('')
+      }${songs.length>8?`<tr><td colspan="4" style="color:var(--muted);text-align:center">...och ${songs.length-8} till</td></tr>`:''}</tbody></table>`;
+      updateSaveBtn();
+    }catch(err){
+      pendingSongs=[];
+      document.getElementById('csv-status').innerHTML=`<span style="color:var(--danger);font-size:.82rem">✗ ${err.message}</span>`;
+      document.getElementById('csv-preview').innerHTML='';
+      updateSaveBtn();
+    }
+  };
+  reader.readAsText(file);
+}
+
+function updateSaveBtn(){
+  const name=document.getElementById('pl-name').value.trim();
+  const key=document.getElementById('pl-key').value.trim();
+  document.getElementById('pl-save-btn').disabled=!(name&&key&&pendingSongs.length);
+}
+document.getElementById('pl-name').addEventListener('input',updateSaveBtn);
+document.getElementById('pl-key').addEventListener('input',updateSaveBtn);
+
+// Auto-generate key from name
+document.getElementById('pl-name').addEventListener('input',e=>{
+  const keyEl=document.getElementById('pl-key');
+  if(!keyEl._userEdited){
+    keyEl.value=e.target.value.trim().toLowerCase().replace(/[åä]/g,'a').replace(/ö/g,'o').replace(/[^a-z0-9]/g,'').slice(0,20);
+    updateSaveBtn();
+  }
+});
+document.getElementById('pl-key').addEventListener('input',()=>{
+  document.getElementById('pl-key')._userEdited=true;
+});
+
+// Save playlist
+document.getElementById('pl-save-btn').addEventListener('click',async()=>{
+  const name=document.getElementById('pl-name').value.trim();
+  const key=document.getElementById('pl-key').value.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'');
+  if(!name||!key||!pendingSongs.length)return;
+
+  const btn=document.getElementById('pl-save-btn');
+  btn.disabled=true;btn.textContent='Sparar...';
+
+  try{
+    // Get current max sort_order
+    const existing=await sbFetch('rewind_playlists?select=sort_order&order=sort_order.desc&limit=1');
+    const nextOrder=(existing&&existing.length?existing[0].sort_order:0)+1;
+
+    await sbFetch('rewind_playlists',{
+      method:'POST',
+      body:JSON.stringify({key,label:name,songs:pendingSongs,active:true,sort_order:nextOrder})
+    });
+
+    toast('Spellista "'+name+'" sparad med '+pendingSongs.length+' låtar!');
+    // Reset form
+    document.getElementById('pl-name').value='';
+    document.getElementById('pl-key').value='';
+    document.getElementById('pl-key')._userEdited=false;
+    pendingSongs=[];
+    document.getElementById('csv-status').innerHTML='';
+    document.getElementById('csv-preview').innerHTML='';
+    csvFile.value='';
+    updateSaveBtn();
+    loadPlaylists();
+  }catch(e){
+    toast('Fel: '+e.message,'error');
+  }finally{
+    btn.textContent='Spara spellista';
+    updateSaveBtn();
+  }
+});
+
+// --- TEST SCENARIOS ---
+function openTest(scenario){window.open(GAME_URL+'?test='+scenario,'_blank');}
 function openCustomTest(){
   try{
     const players=JSON.parse(document.getElementById('test-players').value);
@@ -254,8 +640,7 @@ function openCustomTest(){
 // --- INIT ---
 document.getElementById('refresh-stats').addEventListener('click',loadStats);
 document.getElementById('refresh-events').addEventListener('click',loadEvents);
-loadStats();
-loadEvents();
+initAuth();
 </script>
 </body>
 </html>
