@@ -925,7 +925,7 @@ function parseCSVLine(line){
 // All playlists loaded from Supabase cloud — manage via admin panel
 
 const START_TOKENS=3;
-const MAX_TOKENS=5;
+const MAX_TOKENS=99;
 let WIN=10;
 
 // phases: draw | listen | place | challenge | reveal
@@ -1070,7 +1070,8 @@ function buildTl(cards, mode, pendingPos, bets){
 // --- Scoreboard ---
 function buildTokenDots(count){
   let dots='';
-  for(let i=0;i<MAX_TOKENS;i++) dots+=`<div class="score-token-dot${i>=count?' empty':''}"></div>`;
+  const show=Math.min(count,6);
+  for(let i=0;i<show;i++) dots+=`<div class="score-token-dot"></div>`;
   return dots;
 }
 function buildScoreboard(){
@@ -1772,23 +1773,26 @@ function applyGuessResult(guessType){
   const outcomes=[...rd.outcomes];
 
   if(guessType==='star'){
-    // artist + title + year correct — secure card, no token
+    // artist + title + year correct — secure card AND +1 token
     S.players[S.pidx].cards=S.players[S.pidx].cards.map(c=>
       c.id===card.id&&c._new?{...c,_securedStar:true,_unsecured:false}:c
     );
     checkWin(S.pidx);
-    outcomes.push({name:cp.name,text:'⭐ Kortet säkras — rätt artist, titel & år!',cls:'gold'});
+    if(!S.luckRound){
+      S.players[S.pidx].tokens=clamp(cp.tokens+1,0,MAX_TOKENS);
+      outcomes.push({name:cp.name,text:'⭐ Kortet säkras + 1 pollett — rätt artist, titel & år!',cls:'gold'});
+    } else {
+      outcomes.push({name:cp.name,text:'⭐ Kortet säkras — rätt artist, titel & år!',cls:'gold'});
+    }
   } else if(guessType==='good'){
     // artist + title correct (NOT year):
     // - Original mode: +1 token, card NOT secured
     // - Luck round: NO reward (only star secures in luck round)
     if(S.luckRound){
       outcomes.push({name:cp.name,text:'Rätt artist & titel — men året saknades, kortet ej säkrat',cls:'good'});
-    } else if(cp.tokens<MAX_TOKENS){
+    } else {
       S.players[S.pidx].tokens=clamp(cp.tokens+1,0,MAX_TOKENS);
       outcomes.push({name:cp.name,text:'+1 pollett — rätt artist & titel! 🎉',cls:'good'});
-    } else {
-      outcomes.push({name:cp.name,text:'Rätt artist & titel! (Max polletter nådda)',cls:'good'});
     }
   }
   // 'bad' = no reward, no message needed
