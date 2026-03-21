@@ -807,13 +807,14 @@ async function loadCloudPlaylists(){
       if(pl.songs&&pl.songs.length){
         // Normalize song format: ensure every song has id and url fields
         const normalized=pl.songs.map((s,i)=>{
-          const spotifyId=s.spotify||s.id||('unknown_'+i);
+          const raw=s.spotify||s.url||'';
+          const spotifyId=typeof raw==='string'&&raw.length>5?raw.replace('spotify:track:',''):'unknown_'+i;
           return {
             id:spotifyId,
             artist:s.artist||'',
             title:s.title||'',
             year:parseInt(s.year)||0,
-            url:s.url||(spotifyId.startsWith('spotify:track:')?spotifyId:'spotify:track:'+spotifyId)
+            url:'spotify:track:'+spotifyId
           };
         });
         PLAYLISTS_DATA.push({key:pl.key,label:pl.label,songs:normalized});
