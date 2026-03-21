@@ -1241,13 +1241,19 @@ function render(){
               <span class="decided-badge ${hasBet?'decided-bet':'decided-pass'}">${hasBet?'🪙 Satsad':'Passar'}</span>
             </div>`;
           }
+          if(opp.tokens<1){
+            return `<div class="opp-row">
+              <div class="opp-left"><div class="opp-name">${opp.name}</div></div>
+              <span class="decided-badge decided-pass">Passar (0 polletter)</span>
+            </div>`;
+          }
           return `<div class="opp-row">
             <div class="opp-left">
               <div class="opp-name">${opp.name}</div>
               <div class="opp-tokens">🪙 ${opp.tokens} pollett${opp.tokens===1?'':'er'}</div>
             </div>
             <div class="opp-right">
-              <button class="btn-challenge" data-chal="${opp.i}" ${opp.tokens<1?'disabled':''}>🪙 Satsa</button>
+              <button class="btn-challenge" data-chal="${opp.i}">🪙 Satsa</button>
               <button class="btn-pass" data-pass="${opp.i}">Passar</button>
             </div>
           </div>`;
@@ -1409,7 +1415,8 @@ function bindEvents(){
     // Confirm button — locks position and moves to challenge
     h(R.querySelector('#confirmbtn'),'click',()=>{
       if(S.placedPos===null)return;
-      S.challengePending=S.players.map((_,i)=>i).filter(i=>i!==S.pidx);
+      // Only include opponents who have tokens; auto-pass those with 0
+      S.challengePending=S.players.map((_,i)=>i).filter(i=>i!==S.pidx&&S.players[i].tokens>=1);
       S.challengeBets={};
       S.phase='challenge';render();
     });
